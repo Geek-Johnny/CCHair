@@ -5,3 +5,4 @@ export { default as AnalysisCard } from "./analysis-card";
 export { default as HairStyleSelector } from "./hair-style-selector";
 export { default as ResultGrid } from "./result-grid";
 export { default as ResultCard } from "./result-card";
+export { default as HistoryPanel } from "./history-panel";

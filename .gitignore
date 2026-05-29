@@ -30,6 +30,11 @@ yarn-error.log*
 # vercel
 .vercel
 
+# generated test images
+Pictures/generated-*
+Pictures/*-short.png
+Pictures/*-long.png
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
