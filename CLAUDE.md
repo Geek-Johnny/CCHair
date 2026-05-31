@@ -113,6 +113,7 @@ npm run lint      # 代码检查
 ✅ 阶段 5.5：体验优化 + 新功能
   - Toast 通知组件（API 错误/成功反馈，自动消失）
   - 上传校验（格式限制 JPG/PNG/WebP，大小上限 10MB）
+  - 移动端上传兼容性（DOM 内隐藏 input + ref 触发）
   - Lightbox 键盘支持（Escape 关闭 + body 滚动锁定 + 无障碍）
   - 性别过滤 bug 修复（gender 未定义时显示全部热门发型）
   - 响应式布局（移动端单列，md+ 双列）
