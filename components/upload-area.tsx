@@ -1,20 +1,31 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { Upload, Image as ImageIcon } from "lucide-react";
+import { Upload } from "lucide-react";
+
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_SIZE_MB = 10;
 
 interface UploadAreaProps {
   onImageUpload: (base64: string) => void;
+  onError?: (message: string) => void;
   currentImage: string | null;
   disabled: boolean;
 }
 
-export default function UploadArea({ onImageUpload, currentImage, disabled }: UploadAreaProps) {
+export default function UploadArea({ onImageUpload, onError, currentImage, disabled }: UploadAreaProps) {
   const [dragging, setDragging] = useState(false);
 
   const handleFile = useCallback(
     (file: File) => {
-      if (!file.type.startsWith("image/")) return;
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        onError?.("仅支持 JPG、PNG、WebP 格式的图片");
+        return;
+      }
+      if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+        onError?.("图片过大，请压缩至 10MB 以内后重试");
+        return;
+      }
       const reader = new FileReader();
       reader.onload = (e) => {
         const result = e.target?.result as string;
@@ -23,7 +34,7 @@ export default function UploadArea({ onImageUpload, currentImage, disabled }: Up
       };
       reader.readAsDataURL(file);
     },
-    [onImageUpload]
+    [onImageUpload, onError]
   );
 
   const handleDrop = useCallback(

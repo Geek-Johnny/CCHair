@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Sparkles, Flame, Check, Palette } from "lucide-react";
+import { Sparkles, Flame, Check, Palette, Dice5 } from "lucide-react";
 import { HAIR_CATEGORIES, POPULAR_HAIRSTYLES, HAIR_COLORS } from "@/types";
 import type { GenerateItem } from "@/types";
 
 interface HairStyleSelectorProps {
   onGenerate: (items: GenerateItem[]) => void;
+  onRandomGenerate: () => void;
   generating: boolean;
   disabled: boolean;
   gender?: string;
@@ -27,6 +28,7 @@ const EMPTY_CUSTOM: Record<string, CustomSlot> = {
 
 export default function HairStyleSelector({
   onGenerate,
+  onRandomGenerate,
   generating,
   disabled,
   gender,
@@ -46,12 +48,15 @@ export default function HairStyleSelector({
 
   const isSelected = (name: string) => selectedNames.has(name);
 
+  const isMale = gender === "男" || gender === "男性";
+  const genderKnown = gender !== undefined && gender !== null && gender !== "";
+
   const filteredPopular = useMemo(
     () =>
-      POPULAR_HAIRSTYLES.filter(
-        (h) => gender === "男" || gender === "男性" ? h.gender === "male" : h.gender === "female"
-      ),
-    [gender]
+      genderKnown
+        ? POPULAR_HAIRSTYLES.filter((h) => isMale ? h.gender === "male" : h.gender === "female")
+        : POPULAR_HAIRSTYLES,
+    [isMale, genderKnown]
   );
 
   const handlePreset = (cat: string, name: string) => {
@@ -114,11 +119,25 @@ export default function HairStyleSelector({
       <div className="flex items-center gap-2 px-4 pt-4">
         <Sparkles className="h-4 w-4 text-purple-500" />
         <h3 className="text-sm font-semibold text-gray-700">选择发型</h3>
-        {totalCount > 0 && (
-          <span className="ml-auto text-xs text-gray-400">
-            已选 {totalCount} 款
-          </span>
-        )}
+        <div className="ml-auto flex items-center gap-2">
+          {totalCount > 0 && (
+            <span className="text-xs text-gray-400">
+              已选 {totalCount} 款
+            </span>
+          )}
+          <button
+            onClick={onRandomGenerate}
+            disabled={generating}
+            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+              generating
+                ? "cursor-not-allowed bg-gray-100 text-gray-400"
+                : "bg-primary-500 text-white shadow-sm hover:bg-primary-600"
+            }`}
+          >
+            <Dice5 className="h-3.5 w-3.5" />
+            随机生成 6 款
+          </button>
+        </div>
       </div>
 
       <div className="space-y-4 px-4 pb-4 pt-3">
@@ -154,8 +173,10 @@ export default function HairStyleSelector({
             <div className="mb-2 flex items-center gap-1.5">
               <Flame className="h-3.5 w-3.5 text-orange-500" />
               <span className="text-xs font-medium text-orange-600">
-                热门发型 ·{" "}
-                {gender === "男" || gender === "男性" ? "男生" : "女生"}
+                热门发型
+                {genderKnown && (
+                  <> · {isMale ? "男生" : "女生"}</>
+                )}
               </span>
             </div>
             <div className="flex flex-wrap gap-1.5">

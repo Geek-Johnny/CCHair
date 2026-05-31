@@ -51,7 +51,7 @@ export default function HistoryPanel({
         className="fixed inset-0 z-40 bg-black/30"
         onClick={onClose}
       />
-      <div className="fixed inset-y-0 right-0 z-50 w-[360px] bg-white shadow-xl">
+      <div className="fixed inset-y-0 right-0 z-50 w-full bg-white shadow-xl md:w-[360px]">
         <div className="flex h-14 items-center justify-between border-b border-surface-200 px-4">
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-primary-500" />
@@ -88,7 +88,7 @@ export default function HistoryPanel({
                   <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-surface-100">
                     {record.originalImage ? (
                       <img
-                        src={record.originalImage}
+                        src={`data:image/jpeg;base64,${record.originalImage}`}
                         alt=""
                         className="h-full w-full object-cover"
                       />

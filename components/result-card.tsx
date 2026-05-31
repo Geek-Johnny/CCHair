@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Download, Expand, Share2 } from "lucide-react";
 import type { GenerationResult } from "@/types";
 
@@ -15,6 +15,19 @@ function getImageSrc(data: string) {
 export default function ResultCard({ result }: ResultCardProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [shared, setShared] = useState(false);
+
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightboxOpen(false);
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
+    };
+  }, [lightboxOpen]);
 
   const handleDownload = useCallback(() => {
     const link = document.createElement("a");
@@ -112,6 +125,8 @@ export default function ResultCard({ result }: ResultCardProps) {
       {lightboxOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          role="dialog"
+          aria-modal="true"
           onClick={() => setLightboxOpen(false)}
         >
           <div

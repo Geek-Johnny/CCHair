@@ -1,6 +1,6 @@
 # CCHair - AI 发型设计参考
 
-**v1.0** — 核心功能完成（人脸分析 / 发型生成 / 历史记录 / 交互优化）
+**v1.1** — 体验优化 + 分享卡片 + 随机生成
 
 ## 项目概述
 上传人像照，AI 分析脸型五官，生成多款发型效果图。
@@ -21,16 +21,18 @@
 │       ├── analyze/route.ts    # 人脸分析（双模型：火山方舟/DMXAPI）
 │       └── generate/route.ts   # 发型生成 → Seedream 5.0 Lite
 ├── lib/
-│   └── db.ts               # IndexedDB 操作（history CRUD）
+│   ├── db.ts               # IndexedDB 操作（history CRUD）
+│   └── share-card.ts       # Canvas 分享卡片渲染（合成原图+分析+结果）
 ├── components/
 │   ├── header.tsx           # 顶部导航（含历史记录按钮）
 │   ├── main-panel.tsx       # 主面板（状态管理中枢，含历史自动保存）
-│   ├── upload-area.tsx      # 拖拽上传
-│   ├── analysis-card.tsx    # 分析结果卡片（含骨架屏）
-│   ├── hair-style-selector.tsx # 发型选择器（AI推荐 + 热门发型 + 定制发型 + 颜色）
+│   ├── upload-area.tsx      # 拖拽上传（含格式/大小校验）
+│   ├── analysis-card.tsx    # 分析结果卡片（含骨架屏 + 错误状态）
+│   ├── hair-style-selector.tsx # 发型选择器（AI推荐 + 热门 + 定制 + 随机生成）
 │   ├── history-panel.tsx    # 历史记录抽屉（列表/加载/删除）
-│   ├── result-grid.tsx      # 结果网格
-│   ├── result-card.tsx      # 单个结果（放大/下载）
+│   ├── result-grid.tsx      # 结果网格（含分享卡片按钮）
+│   ├── result-card.tsx      # 单个结果（放大/下载/分享 + Lightbox 键盘支持）
+│   ├── toast.tsx            # Toast 通知组件（error/success/info）
 │   └── index.ts             # 统一导出
 ├── types/
 │   └── index.ts             # TypeScript 类型 + 发型/颜色数据
@@ -55,12 +57,10 @@ DMXAPI_BASE_URL=https://www.dmxapi.cn/v1
 
 ## 开发命令
 ```bash
-npm run dev       # 启动开发服务器
+npm run dev       # 启动开发服务器（已内置 NODE_TLS_REJECT_UNAUTHORIZED=0）
 npm run build     # 生产构建
 npm run lint      # 代码检查
 ```
-
-> ⚠️ 当前环境下构建/运行需设置 `NODE_TLS_REJECT_UNAUTHORIZED=0`（SSL 证书问题）
 
 ## API 参考
 
@@ -110,6 +110,16 @@ npm run lint      # 代码检查
   - 结果网格顶部显示 "共 N 张" 计数
   - 新结果淡入动画（fadeInUp 0.3s）
   - 悬停操作按钮微放大动效
+✅ 阶段 5.5：体验优化 + 新功能
+  - Toast 通知组件（API 错误/成功反馈，自动消失）
+  - 上传校验（格式限制 JPG/PNG/WebP，大小上限 10MB）
+  - Lightbox 键盘支持（Escape 关闭 + body 滚动锁定 + 无障碍）
+  - 性别过滤 bug 修复（gender 未定义时显示全部热门发型）
+  - 响应式布局（移动端单列，md+ 双列）
+  - 分析失败状态显示（红色错误卡片 + toast 提示）
+  - 结果网格空状态图标优化
+  - 随机生成 6 款发型（一键从发型池随机选取）
+  - 分享卡片（Canvas 合成原图+分析+结果为 PNG，含品牌信息）
 ⬜ 阶段 6：上线准备（支付 + 后端）
   目标：实现简单的付费使用模式，支撑独立上线
   - [ ] 轻量后端（Next.js API Routes 已就绪，扩展即可）

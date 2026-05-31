@@ -5,7 +5,9 @@ import UploadArea from "@/components/upload-area";
 import AnalysisCard from "@/components/analysis-card";
 import HairStyleSelector from "@/components/hair-style-selector";
 import ResultGrid from "@/components/result-grid";
+import ToastContainer, { useToastManager } from "@/components/toast";
 import type { FaceAnalysis, GenerationResult, GenerateItem, HistoryRecord } from "@/types";
+import { POPULAR_HAIRSTYLES } from "@/types";
 import { saveRecord, updateRecordResults } from "@/lib/db";
 
 type AnalyzeProvider = "volcano" | "dmxapi";
@@ -30,6 +32,7 @@ export default function MainPanel({ loadRecord, onRecordLoaded }: MainPanelProps
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<FaceAnalysis | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [results, setResults] = useState<GenerationResult[]>([]);
   const [generating, setGenerating] = useState<GeneratingState>({
     active: false,
@@ -37,6 +40,7 @@ export default function MainPanel({ loadRecord, onRecordLoaded }: MainPanelProps
     total: 0,
   });
   const [provider, setProvider] = useState<AnalyzeProvider>("volcano");
+  const { toasts, removeToast, addError, addSuccess } = useToastManager();
 
   // Refs for tracking state across closures
   const resultsRef = useRef<GenerationResult[]>([]);
@@ -57,6 +61,7 @@ export default function MainPanel({ loadRecord, onRecordLoaded }: MainPanelProps
   const handleImageUpload = async (base64: string) => {
     setOriginalImage(base64);
     setAnalysis(null);
+    setAnalysisError(null);
     setResults([]);
     resultsRef.current = [];
     recordIdRef.current = null;
@@ -84,10 +89,14 @@ export default function MainPanel({ loadRecord, onRecordLoaded }: MainPanelProps
         await saveRecord(record);
         recordIdRef.current = id;
       } else {
-        console.error("分析失败:", data.error);
+        const msg = data.error || "分析失败，请重试";
+        setAnalysisError(msg);
+        addError(msg);
       }
     } catch (err) {
-      console.error("分析请求失败:", err);
+      const msg = "网络错误，请检查网络后重试";
+      setAnalysisError(msg);
+      addError(msg);
     } finally {
       setAnalyzing(false);
     }
@@ -123,10 +132,10 @@ export default function MainPanel({ loadRecord, onRecordLoaded }: MainPanelProps
           resultsRef.current = snapshot;
           setResults([...snapshot]);
         } else {
-          console.error(`生成失败 (${item.name}):`, data.error);
+          addError(`「${item.name}」生成失败: ${data.error || "未知错误"}`);
         }
-      } catch (err) {
-        console.error(`生成请求失败 (${item.name}):`, err);
+      } catch {
+        addError(`「${item.name}」网络错误，请重试`);
       }
     }
 
@@ -139,58 +148,110 @@ export default function MainPanel({ loadRecord, onRecordLoaded }: MainPanelProps
     }
   };
 
+  const handleRandomGenerate = () => {
+    if (!analysis) return;
+
+    // Build pool: AI recommended + gender-filtered popular styles
+    const isMale = analysis.gender === "男" || analysis.gender === "男性";
+    const genderKnown = analysis.gender !== undefined && analysis.gender !== null && analysis.gender !== "";
+
+    const pool: string[] = [];
+
+    // Add AI recommended styles
+    if (analysis.recommendedStyles) {
+      pool.push(...analysis.recommendedStyles);
+    }
+
+    // Add popular styles filtered by gender
+    const popular = genderKnown
+      ? POPULAR_HAIRSTYLES.filter((h) => isMale ? h.gender === "male" : h.gender === "female")
+      : POPULAR_HAIRSTYLES;
+    pool.push(...popular.map((h) => h.name));
+
+    // Deduplicate
+    const unique = [...new Set(pool)];
+
+    // Shuffle and pick 6
+    for (let i = unique.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [unique[i], unique[j]] = [unique[j], unique[i]];
+    }
+
+    const selected = unique.slice(0, 6);
+    const items: GenerateItem[] = selected.map((name) => ({
+      hairstyle: name,
+      name,
+      tags: [name],
+    }));
+
+    // Clear previous results and generate
+    setResults([]);
+    resultsRef.current = [];
+    handleGenerate(items);
+  };
+
   const isBusy = analyzing || generating.active;
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-3.5rem)] max-w-7xl gap-4 p-4">
-      {/* 左侧面板 */}
-      <div className="flex w-[400px] shrink-0 flex-col gap-4 overflow-y-auto">
-        {/* 模型选择 */}
-        <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white p-2">
-          <span className="ml-1 text-xs text-gray-500">分析模型:</span>
-          <div className="flex gap-1">
-            {(Object.entries(PROVIDER_LABELS) as [AnalyzeProvider, string][]).map(
-              ([key, label]) => (
-                <button
-                  key={key}
-                  onClick={() => setProvider(key)}
-                  disabled={isBusy}
-                  className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
-                    provider === key
-                      ? "bg-gray-900 text-white"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  }`}
-                >
-                  {label}
-                </button>
-              )
-            )}
+    <>
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+      <div className="mx-auto flex h-[calc(100vh-3.5rem)] max-w-7xl flex-col gap-4 p-4 md:flex-row">
+        {/* 左侧面板 */}
+        <div className="flex max-h-[50vh] w-full flex-col gap-4 overflow-y-auto md:max-h-none md:w-[400px] md:shrink-0">
+          {/* 模型选择 */}
+          <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white p-2">
+            <span className="ml-1 text-xs text-gray-500">分析模型:</span>
+            <div className="flex gap-1">
+              {(Object.entries(PROVIDER_LABELS) as [AnalyzeProvider, string][]).map(
+                ([key, label]) => (
+                  <button
+                    key={key}
+                    onClick={() => setProvider(key)}
+                    disabled={isBusy}
+                    className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                      provider === key
+                        ? "bg-gray-900 text-white"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                )
+              )}
+            </div>
           </div>
-        </div>
-        <UploadArea
-          onImageUpload={handleImageUpload}
-          currentImage={originalImage}
-          disabled={isBusy}
-        />
-        {(analyzing || analysis) && (
-          <AnalysisCard analysis={analysis} loading={analyzing} />
-        )}
-      </div>
-
-      {/* 右侧面板 */}
-      <div className="flex flex-1 flex-col gap-4 overflow-y-auto pb-4">
-        {originalImage && (
-          <HairStyleSelector
-            key={originalImage.slice(-20)}
-            onGenerate={handleGenerate}
-            generating={generating.active}
-            disabled={!analysis}
-            gender={analysis?.gender}
-            recommendedStyles={analysis?.recommendedStyles}
+          <UploadArea
+            onImageUpload={handleImageUpload}
+            onError={addError}
+            currentImage={originalImage}
+            disabled={isBusy}
           />
-        )}
-        <ResultGrid results={results} generating={generating} />
+          {(analyzing || analysisError || analysis) && (
+            <AnalysisCard analysis={analysis} loading={analyzing} error={analysisError} />
+          )}
+        </div>
+
+        {/* 右侧面板 */}
+        <div className="flex flex-1 flex-col gap-4 overflow-y-auto pb-4">
+          {originalImage && (
+            <HairStyleSelector
+              key={originalImage.slice(-20)}
+              onGenerate={handleGenerate}
+              onRandomGenerate={handleRandomGenerate}
+              generating={generating.active}
+              disabled={!analysis}
+              gender={analysis?.gender}
+              recommendedStyles={analysis?.recommendedStyles}
+            />
+          )}
+          <ResultGrid
+            results={results}
+            generating={generating}
+            originalImage={originalImage}
+            analysis={analysis}
+          />
+        </div>
       </div>
-    </div>
+    </>
   );
 }

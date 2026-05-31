@@ -1,8 +1,10 @@
 "use client";
 
-import { Loader2, Download } from "lucide-react";
+import { useState } from "react";
+import { Loader2, Download, ImageIcon, Share2 } from "lucide-react";
 import ResultCard from "@/components/result-card";
-import type { GenerationResult } from "@/types";
+import { generateShareCard } from "@/lib/share-card";
+import type { GenerationResult, FaceAnalysis } from "@/types";
 
 interface GeneratingState {
   active: boolean;
@@ -13,9 +15,12 @@ interface GeneratingState {
 interface ResultGridProps {
   results: GenerationResult[];
   generating: GeneratingState;
+  originalImage?: string | null;
+  analysis?: FaceAnalysis | null;
 }
 
-export default function ResultGrid({ results, generating }: ResultGridProps) {
+export default function ResultGrid({ results, generating, originalImage, analysis }: ResultGridProps) {
+  const [generatingCard, setGeneratingCard] = useState(false);
   const handleBatchDownload = () => {
     results.forEach((result, i) => {
       setTimeout(() => {
@@ -30,7 +35,26 @@ export default function ResultGrid({ results, generating }: ResultGridProps) {
     });
   };
 
+  const handleShareCard = async () => {
+    if (!originalImage || !analysis || results.length === 0) return;
+    setGeneratingCard(true);
+    try {
+      const blob = await generateShareCard({ originalImage, analysis, results });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.download = `cchair-share-${Date.now()}.png`;
+      link.href = url;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("生成分享卡片失败:", err);
+    } finally {
+      setGeneratingCard(false);
+    }
+  };
+
   const showEmpty = results.length === 0 && !generating.active;
+  const canShare = results.length > 0 && originalImage && analysis;
 
   return (
     <div>
@@ -40,20 +64,35 @@ export default function ResultGrid({ results, generating }: ResultGridProps) {
           <p className="text-xs text-surface-400">
             共 <span className="font-semibold text-surface-600">{results.length}</span> 张
           </p>
-          <button
-            onClick={handleBatchDownload}
-            disabled={generating.active}
-            className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-surface-500 transition-colors hover:bg-surface-100 hover:text-surface-700 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <Download className="h-3.5 w-3.5" />
-            全部下载
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleShareCard}
+              disabled={generating.active || generatingCard || !canShare}
+              className="flex items-center gap-1.5 rounded-lg bg-primary-500 px-3 py-1.5 text-xs font-medium text-white shadow-sm transition-colors hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {generatingCard ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Share2 className="h-3.5 w-3.5" />
+              )}
+              生成分享卡片
+            </button>
+            <button
+              onClick={handleBatchDownload}
+              disabled={generating.active}
+              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-surface-500 transition-colors hover:bg-surface-100 hover:text-surface-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Download className="h-3.5 w-3.5" />
+              全部下载
+            </button>
+          </div>
         </div>
       )}
 
       {/* Grid */}
       {showEmpty ? (
-        <div className="flex items-center justify-center py-16">
+        <div className="flex flex-col items-center gap-3 py-16">
+          <ImageIcon className="h-10 w-10 text-surface-300" />
           <p className="text-sm text-surface-400">
             上传人像照并选择发型后，效果将在这里展示
           </p>

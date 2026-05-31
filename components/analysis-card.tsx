@@ -6,13 +6,14 @@ import type { FaceAnalysis } from "@/types";
 interface AnalysisCardProps {
   analysis: FaceAnalysis | null;
   loading: boolean;
+  error?: string | null;
 }
 
 function SkeletonLine({ width = "w-full" }: { width?: string }) {
   return <div className={`h-4 animate-pulse rounded bg-surface-200 ${width}`} />;
 }
 
-export default function AnalysisCard({ analysis, loading }: AnalysisCardProps) {
+export default function AnalysisCard({ analysis, loading, error }: AnalysisCardProps) {
   return (
     <div className="rounded-xl border border-surface-200 bg-white p-4">
       <div className="mb-3 flex items-center gap-2">
@@ -27,6 +28,12 @@ export default function AnalysisCard({ analysis, loading }: AnalysisCardProps) {
           <SkeletonLine width="w-5/6" />
           <SkeletonLine width="w-2/3" />
           <SkeletonLine width="w-4/5" />
+        </div>
+      ) : error ? (
+        <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
+          <p className="font-medium">分析失败</p>
+          <p className="mt-1 text-xs text-red-500">{error}</p>
+          <p className="mt-1 text-xs text-red-400">请更换图片或切换模型后重试</p>
         </div>
       ) : analysis ? (
         <div className="space-y-3 text-sm">
