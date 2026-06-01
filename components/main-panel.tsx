@@ -10,12 +10,7 @@ import type { FaceAnalysis, GenerationResult, GenerateItem, HistoryRecord } from
 import { POPULAR_HAIRSTYLES } from "@/types";
 import { saveRecord, updateRecordResults } from "@/lib/db";
 
-type AnalyzeProvider = "volcano" | "dmxapi";
-
-const PROVIDER_LABELS: Record<AnalyzeProvider, string> = {
-  volcano: "火山方舟 (Doubao)",
-  dmxapi: "DMXAPI (Mimo-V2.5)",
-};
+const ANALYZE_PROVIDER = "dmxapi";
 
 interface GeneratingState {
   active: boolean;
@@ -39,7 +34,6 @@ export default function MainPanel({ loadRecord, onRecordLoaded }: MainPanelProps
     current: 0,
     total: 0,
   });
-  const [provider, setProvider] = useState<AnalyzeProvider>("volcano");
   const { toasts, removeToast, addError, addSuccess } = useToastManager();
 
   // Refs for tracking state across closures
@@ -71,7 +65,7 @@ export default function MainPanel({ loadRecord, onRecordLoaded }: MainPanelProps
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: base64, provider }),
+        body: JSON.stringify({ image: base64, provider: ANALYZE_PROVIDER }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -201,28 +195,6 @@ export default function MainPanel({ loadRecord, onRecordLoaded }: MainPanelProps
       <div className="mx-auto flex h-[calc(100vh-3.5rem)] max-w-7xl flex-col gap-4 p-4 md:flex-row">
         {/* 左侧面板 */}
         <div className="flex max-h-[50vh] w-full flex-col gap-4 overflow-y-auto md:max-h-none md:w-[400px] md:shrink-0">
-          {/* 模型选择 */}
-          <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white p-2">
-            <span className="ml-1 text-xs text-gray-500">分析模型:</span>
-            <div className="flex gap-1">
-              {(Object.entries(PROVIDER_LABELS) as [AnalyzeProvider, string][]).map(
-                ([key, label]) => (
-                  <button
-                    key={key}
-                    onClick={() => setProvider(key)}
-                    disabled={isBusy}
-                    className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
-                      provider === key
-                        ? "bg-gray-900 text-white"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                )
-              )}
-            </div>
-          </div>
           <UploadArea
             onImageUpload={handleImageUpload}
             onError={addError}

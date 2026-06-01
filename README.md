@@ -1,12 +1,12 @@
-# CCHair - AI 发型设计参考
+# CCHair - AI 发型设计
 
 > 上传人像照，AI 分析脸型五官，一键生成多款发型效果图
-> **v1.2** — Freemium 额度系统 + 套餐购买
+> **v1.2** — 已上线 https://www.aiheaven.top
 
 ## 核心功能
 
 1. **人像上传** — 拖拽或点击上传，支持 JPG/PNG/WebP，≤10MB 校验
-2. **AI 人脸分析** — 可选 Doubao-seed-2.0-mini（火山方舟）或 Mimo-V2.5（DMXAPI）
+2. **AI 人脸分析** — Mimo-V2.5 (DMXAPI) 智能识别脸型、肤色、五官特征
 3. **发型选择** — 四种方式：
    - AI 推荐发型（分析结果自动推荐 3 款）
    - 热门发型预设（20 款男/女热门，悬浮看详细介绍）
@@ -34,10 +34,11 @@
 | 前端框架 | Next.js 15 (App Router) |
 | 语言 | TypeScript |
 | 样式 | Tailwind CSS v4 |
-| 人脸分析 | Doubao-seed-2.0-mini（火山方舟）/ Mimo-V2.5（DMXAPI） |
-| 图像生成 | Seedream 5.0 Lite（火山方舟） |
+| 人脸分析 | Mimo-V2.5 (DMXAPI) |
+| 图像生成 | Seedream 5.0 Lite (火山方舟) |
 | 用户识别 | Cookie-based session（匿名） |
-| 数据存储 | JSON 文件（轻量级） |
+| 数据存储 | JSON 文件 + 内存缓存 |
+| 部署 | Vercel（自动 SSL + 边缘网络） |
 
 ## 快速开始
 
@@ -100,9 +101,12 @@ CCHair/
 
 | 服务 | 模型 | 单次调用 |
 |------|------|---------|
-| 人脸分析（火山方舟） | Doubao-seed-2.0-mini | ~0.01元 |
-| 人脸分析（DMXAPI） | Mimo-V2.5 | ~0.016元（降价后 ~0.004元） |
+| 人脸分析 | Mimo-V2.5 (DMXAPI) | ~0.004元 |
 | 发型生成 | Seedream 5.0 Lite | ~0.25元/张 |
+
+## 在线访问
+
+🔗 **https://www.aiheaven.top**
 
 ## License
 

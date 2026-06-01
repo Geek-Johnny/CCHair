@@ -22,12 +22,25 @@ interface OrderData {
   paidAt?: number;
 }
 
-async function ensureDataDir() {
+// In-memory cache for Vercel (file system not persistent)
+const memoryCache = new Map<string, UserData>();
+
+let fsAvailable: boolean | null = null;
+
+async function checkFsAvailable(): Promise<boolean> {
+  if (fsAvailable !== null) return fsAvailable;
   try {
     await fs.access(DATA_DIR);
+    fsAvailable = true;
   } catch {
-    await fs.mkdir(DATA_DIR, { recursive: true });
+    try {
+      await fs.mkdir(DATA_DIR, { recursive: true });
+      fsAvailable = true;
+    } catch {
+      fsAvailable = false;
+    }
   }
+  return fsAvailable;
 }
 
 function userFilePath(sessionId: string): string {
@@ -52,18 +65,34 @@ async function writeJSON<T>(filePath: string, data: T): Promise<void> {
 }
 
 export async function getUser(sessionId: string): Promise<UserData> {
-  await ensureDataDir();
-  const existing = await readJSON<UserData>(userFilePath(sessionId));
-  if (existing) {
-    return existing;
+  // Try file storage first
+  if (await checkFsAvailable()) {
+    const existing = await readJSON<UserData>(userFilePath(sessionId));
+    if (existing) return existing;
   }
+
+  // Fall back to memory cache
+  const cached = memoryCache.get(sessionId);
+  if (cached) return cached;
+
   const user: UserData = {
     sessionId,
     freeUsed: 0,
     paidCredits: 0,
     createdAt: Date.now(),
   };
-  await writeJSON(userFilePath(sessionId), user);
+
+  // Try to persist to file
+  if (await checkFsAvailable()) {
+    try {
+      await writeJSON(userFilePath(sessionId), user);
+    } catch {
+      // Ignore write errors
+    }
+  }
+
+  // Always cache in memory
+  memoryCache.set(sessionId, user);
   return user;
 }
 
@@ -91,7 +120,18 @@ export async function consumeQuota(sessionId: string): Promise<{ freeRemaining: 
     throw new Error("QUOTA_EXCEEDED");
   }
 
-  await writeJSON(userFilePath(sessionId), user);
+  // Try to persist to file
+  if (await checkFsAvailable()) {
+    try {
+      await writeJSON(userFilePath(sessionId), user);
+    } catch {
+      // Ignore write errors
+    }
+  }
+
+  // Always update memory cache
+  memoryCache.set(sessionId, user);
+
   const newFreeRemaining = Math.max(0, FREE_CREDITS - user.freeUsed);
   return {
     freeRemaining: newFreeRemaining,
@@ -103,11 +143,18 @@ export async function consumeQuota(sessionId: string): Promise<{ freeRemaining: 
 export async function addCredits(sessionId: string, credits: number): Promise<void> {
   const user = await getUser(sessionId);
   user.paidCredits += credits;
-  await writeJSON(userFilePath(sessionId), user);
+
+  if (await checkFsAvailable()) {
+    try {
+      await writeJSON(userFilePath(sessionId), user);
+    } catch {
+      // Ignore
+    }
+  }
+  memoryCache.set(sessionId, user);
 }
 
 export async function createOrder(sessionId: string, plan: PlanKey): Promise<OrderData> {
-  await ensureDataDir();
   const planInfo = PLANS[plan];
   const order: OrderData = {
     id: `order-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
@@ -118,36 +165,66 @@ export async function createOrder(sessionId: string, plan: PlanKey): Promise<Ord
     status: "pending",
     createdAt: Date.now(),
   };
-  await writeJSON(orderFilePath(order.id), order);
+
+  if (await checkFsAvailable()) {
+    try {
+      await writeJSON(orderFilePath(order.id), order);
+    } catch {
+      // Ignore
+    }
+  }
   return order;
 }
 
 export async function updateOrder(orderId: string, status: "paid" | "failed"): Promise<OrderData | null> {
-  const order = await readJSON<OrderData>(orderFilePath(orderId));
+  let order: OrderData | null = null;
+
+  if (await checkFsAvailable()) {
+    order = await readJSON<OrderData>(orderFilePath(orderId));
+  }
+
   if (!order) return null;
+
   order.status = status;
   if (status === "paid") {
     order.paidAt = Date.now();
   }
-  await writeJSON(orderFilePath(orderId), order);
+
+  if (await checkFsAvailable()) {
+    try {
+      await writeJSON(orderFilePath(orderId), order);
+    } catch {
+      // Ignore
+    }
+  }
   return order;
 }
 
 export async function getOrder(orderId: string): Promise<OrderData | null> {
-  return readJSON<OrderData>(orderFilePath(orderId));
+  if (await checkFsAvailable()) {
+    return readJSON<OrderData>(orderFilePath(orderId));
+  }
+  return null;
 }
 
 export async function listOrders(sessionId: string): Promise<OrderData[]> {
-  await ensureDataDir();
-  const files = await fs.readdir(DATA_DIR);
-  const orders: OrderData[] = [];
-  for (const file of files) {
-    if (file.startsWith("order-") && file.endsWith(".json")) {
-      const order = await readJSON<OrderData>(path.join(DATA_DIR, file));
-      if (order && order.sessionId === sessionId) {
-        orders.push(order);
+  if (!(await checkFsAvailable())) {
+    return [];
+  }
+
+  try {
+    const files = await fs.readdir(DATA_DIR);
+    const orders: OrderData[] = [];
+    for (const file of files) {
+      if (file.startsWith("order-") && file.endsWith(".json")) {
+        const order = await readJSON<OrderData>(path.join(DATA_DIR, file));
+        if (order && order.sessionId === sessionId) {
+          orders.push(order);
+        }
       }
     }
+    return orders.sort((a, b) => b.createdAt - a.createdAt);
+  } catch {
+    return [];
   }
-  return orders.sort((a, b) => b.createdAt - a.createdAt);
 }

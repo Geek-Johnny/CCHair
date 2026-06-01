@@ -1,6 +1,6 @@
-# CCHair - AI 发型设计参考
+# CCHair - AI 发型设计
 
-**v1.2** — Freemium 额度系统 + 套餐购买
+**v1.2** — Freemium 额度系统 + Vercel 部署
 
 ## 项目概述
 上传人像照，AI 分析脸型五官，生成多款发型效果图。
@@ -8,10 +8,11 @@
 ## 技术栈
 - **框架**: Next.js 15 (App Router) + TypeScript
 - **样式**: Tailwind CSS v4
-- **人脸分析**: Doubao-seed-2.0-mini (火山方舟, Responses API) / Mimo-V2.5 (DMXAPI, OpenAI 格式)
+- **人脸分析**: Mimo-V2.5 (DMXAPI, OpenAI 格式)
 - **图像生成**: Seedream 5.0 Lite (火山方舟, images/generations API)
 - **用户识别**: Cookie-based session（匿名，无注册）
-- **数据存储**: JSON 文件（轻量级，data/ 目录，已 gitignore）
+- **数据存储**: JSON 文件 + 内存缓存（Vercel Serverless 兼容）
+- **部署**: Vercel（自动 SSL + 边缘网络）
 
 ## 目录结构
 ```
@@ -76,12 +77,10 @@ npm run lint      # 代码检查
 ## API 参考
 
 ### POST /api/analyze
-人脸分析，支持双模型切换（不扣额度）：
-- `provider: "volcano"`（默认）：调用 Doubao-seed-2.0-mini（火山方舟 Responses API）
-- `provider: "dmxapi"`：调用 Mimo-V2.5（DMXAPI, OpenAI 兼容格式）
+人脸分析，使用 Mimo-V2.5（DMXAPI, OpenAI 兼容格式），不扣额度。
 ```json
-// Request: { "image": "base64编码的图片", "provider": "volcano" | "dmxapi" }
-// Response: { "analysis": { FaceAnalysis }, "provider": "volcano" | "dmxapi" }
+// Request: { "image": "base64编码的图片" }
+// Response: { "analysis": { FaceAnalysis }, "provider": "dmxapi" }
 ```
 
 ### POST /api/generate
@@ -121,21 +120,29 @@ npm run lint      # 代码检查
 ## 成本参考
 | 服务 | 模型 | 单次调用 |
 |------|------|---------|
-| 人脸分析（火山方舟） | Doubao-seed-2.0-mini | ~0.01元 |
-| 人脸分析（DMXAPI） | Mimo-V2.5 | ~0.016元（降价后 ~0.004元） |
+| 人脸分析 | Mimo-V2.5 (DMXAPI) | ~0.004元 |
 | 发型生成 | Seedream 5.0 Lite | ~0.25元/张 |
+
+## 部署信息
+- **生产环境**: https://www.aiheaven.top
+- **Vercel 项目**: cchair
+- **GitHub**: https://github.com/Geek-Johnny/CCHair
 
 ## 项目状态
 ✅ 阶段 1-5.5：核心功能 + 体验优化完成
 ✅ 阶段 6.1：Freemium 额度系统
   - Cookie-based 匿名 session（1 年有效期）
-  - JSON 文件存储用户数据和订单
-  - 额度检查注入 generate API（免费 3 次/日）
+  - JSON 文件存储 + 内存缓存（Vercel Serverless 兼容）
+  - 额度检查注入 generate API（免费 3 次）
   - 额度耗尽自动提示升级
   - Header 额度状态栏（剩余次数 + 升级按钮）
   - 套餐购买弹窗（GO/Plus/Pro 三列卡片）
+✅ 部署：Vercel 生产环境上线
+  - 自动 SSL 证书
+  - 边缘网络加速
+  - GitHub 自动部署
 ⬜ 阶段 6.2：支付对接
   - [ ] 接入实际支付平台（草莓支付/PayJS 等）
   - [ ] 支付回调签名验证
   - [ ] 支付成功后自动充值额度
-  - [ ] 部署方案（Vercel + data/ 持久化）
+  - [ ] 外部数据库（Vercel KV / Supabase）实现持久化存储

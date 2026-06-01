@@ -21,7 +21,7 @@ export default function Header({ onHistoryClick }: HeaderProps) {
           <span className="text-lg font-semibold text-surface-900">
             CCHair
           </span>
-          <span className="text-sm text-surface-500">AI 发型设计参考</span>
+          <span className="text-sm text-surface-500">AI 发型设计</span>
           <div className="ml-auto flex items-center gap-3">
             <QuotaBar onUpgrade={() => setShowPlans(true)} />
             <button
