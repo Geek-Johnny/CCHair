@@ -1,8 +1,10 @@
-import fs from "fs/promises";
-import path from "path";
+import { Redis } from "@upstash/redis";
 import { PLANS, FREE_CREDITS, type PlanKey } from "@/types/plan";
 
-const DATA_DIR = path.join(process.cwd(), "data");
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
 
 interface UserData {
   sessionId: string;
@@ -22,58 +24,21 @@ interface OrderData {
   paidAt?: number;
 }
 
-// In-memory cache for Vercel (file system not persistent)
-const memoryCache = new Map<string, UserData>();
-
-let fsAvailable: boolean | null = null;
-
-async function checkFsAvailable(): Promise<boolean> {
-  if (fsAvailable !== null) return fsAvailable;
-  try {
-    await fs.access(DATA_DIR);
-    fsAvailable = true;
-  } catch {
-    try {
-      await fs.mkdir(DATA_DIR, { recursive: true });
-      fsAvailable = true;
-    } catch {
-      fsAvailable = false;
-    }
-  }
-  return fsAvailable;
+function userKey(sessionId: string): string {
+  return `user:${sessionId}`;
 }
 
-function userFilePath(sessionId: string): string {
-  return path.join(DATA_DIR, `user-${sessionId}.json`);
+function orderKey(orderId: string): string {
+  return `order:${orderId}`;
 }
 
-function orderFilePath(orderId: string): string {
-  return path.join(DATA_DIR, `order-${orderId}.json`);
-}
-
-async function readJSON<T>(filePath: string): Promise<T | null> {
-  try {
-    const raw = await fs.readFile(filePath, "utf-8");
-    return JSON.parse(raw) as T;
-  } catch {
-    return null;
-  }
-}
-
-async function writeJSON<T>(filePath: string, data: T): Promise<void> {
-  await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf-8");
+function userOrdersKey(sessionId: string): string {
+  return `orders:${sessionId}`;
 }
 
 export async function getUser(sessionId: string): Promise<UserData> {
-  // Try file storage first
-  if (await checkFsAvailable()) {
-    const existing = await readJSON<UserData>(userFilePath(sessionId));
-    if (existing) return existing;
-  }
-
-  // Fall back to memory cache
-  const cached = memoryCache.get(sessionId);
-  if (cached) return cached;
+  const existing = await redis.get<UserData>(userKey(sessionId));
+  if (existing) return existing;
 
   const user: UserData = {
     sessionId,
@@ -82,17 +47,7 @@ export async function getUser(sessionId: string): Promise<UserData> {
     createdAt: Date.now(),
   };
 
-  // Try to persist to file
-  if (await checkFsAvailable()) {
-    try {
-      await writeJSON(userFilePath(sessionId), user);
-    } catch {
-      // Ignore write errors
-    }
-  }
-
-  // Always cache in memory
-  memoryCache.set(sessionId, user);
+  await redis.set(userKey(sessionId), user);
   return user;
 }
 
@@ -120,18 +75,7 @@ export async function consumeQuota(sessionId: string): Promise<{ freeRemaining: 
     throw new Error("QUOTA_EXCEEDED");
   }
 
-  // Try to persist to file
-  if (await checkFsAvailable()) {
-    try {
-      await writeJSON(userFilePath(sessionId), user);
-    } catch {
-      // Ignore write errors
-    }
-  }
-
-  // Always update memory cache
-  memoryCache.set(sessionId, user);
-
+  await redis.set(userKey(sessionId), user);
   const newFreeRemaining = Math.max(0, FREE_CREDITS - user.freeUsed);
   return {
     freeRemaining: newFreeRemaining,
@@ -143,15 +87,7 @@ export async function consumeQuota(sessionId: string): Promise<{ freeRemaining: 
 export async function addCredits(sessionId: string, credits: number): Promise<void> {
   const user = await getUser(sessionId);
   user.paidCredits += credits;
-
-  if (await checkFsAvailable()) {
-    try {
-      await writeJSON(userFilePath(sessionId), user);
-    } catch {
-      // Ignore
-    }
-  }
-  memoryCache.set(sessionId, user);
+  await redis.set(userKey(sessionId), user);
 }
 
 export async function createOrder(sessionId: string, plan: PlanKey): Promise<OrderData> {
@@ -166,23 +102,14 @@ export async function createOrder(sessionId: string, plan: PlanKey): Promise<Ord
     createdAt: Date.now(),
   };
 
-  if (await checkFsAvailable()) {
-    try {
-      await writeJSON(orderFilePath(order.id), order);
-    } catch {
-      // Ignore
-    }
-  }
+  await redis.set(orderKey(order.id), order);
+  // Add to user's order list
+  await redis.sadd(userOrdersKey(sessionId), order.id);
   return order;
 }
 
 export async function updateOrder(orderId: string, status: "paid" | "failed"): Promise<OrderData | null> {
-  let order: OrderData | null = null;
-
-  if (await checkFsAvailable()) {
-    order = await readJSON<OrderData>(orderFilePath(orderId));
-  }
-
+  const order = await redis.get<OrderData>(orderKey(orderId));
   if (!order) return null;
 
   order.status = status;
@@ -190,41 +117,22 @@ export async function updateOrder(orderId: string, status: "paid" | "failed"): P
     order.paidAt = Date.now();
   }
 
-  if (await checkFsAvailable()) {
-    try {
-      await writeJSON(orderFilePath(orderId), order);
-    } catch {
-      // Ignore
-    }
-  }
+  await redis.set(orderKey(orderId), order);
   return order;
 }
 
 export async function getOrder(orderId: string): Promise<OrderData | null> {
-  if (await checkFsAvailable()) {
-    return readJSON<OrderData>(orderFilePath(orderId));
-  }
-  return null;
+  return redis.get<OrderData>(orderKey(orderId));
 }
 
 export async function listOrders(sessionId: string): Promise<OrderData[]> {
-  if (!(await checkFsAvailable())) {
-    return [];
-  }
+  const orderIds = await redis.smembers(userOrdersKey(sessionId));
+  if (!orderIds || orderIds.length === 0) return [];
 
-  try {
-    const files = await fs.readdir(DATA_DIR);
-    const orders: OrderData[] = [];
-    for (const file of files) {
-      if (file.startsWith("order-") && file.endsWith(".json")) {
-        const order = await readJSON<OrderData>(path.join(DATA_DIR, file));
-        if (order && order.sessionId === sessionId) {
-          orders.push(order);
-        }
-      }
-    }
-    return orders.sort((a, b) => b.createdAt - a.createdAt);
-  } catch {
-    return [];
+  const orders: OrderData[] = [];
+  for (const id of orderIds) {
+    const order = await redis.get<OrderData>(orderKey(id));
+    if (order) orders.push(order);
   }
+  return orders.sort((a, b) => b.createdAt - a.createdAt);
 }
