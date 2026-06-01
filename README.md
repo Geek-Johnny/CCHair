@@ -1,7 +1,7 @@
 # CCHair - AI 发型设计参考
 
-> 上传人像照，AI 分析脸型五官，一键生成多款发型效果图  
-> **v1.1** — 体验优化 + 分享卡片 + 随机生成
+> 上传人像照，AI 分析脸型五官，一键生成多款发型效果图
+> **v1.2** — Freemium 额度系统 + 套餐购买
 
 ## 核心功能
 
@@ -16,7 +16,16 @@
 5. **网格展示** — 多款发型效果以网格排列，支持放大、下载和分享
 6. **分享卡片** — 将原图、脸型分析、生成结果合成为一张精美图片，方便社交分享
 7. **历史记录** — 分析结果和生成结果自动保存（IndexedDB），支持查看、恢复和删除
-8. **批量操作** — 一键下载全部生成结果
+8. **Freemium 额度** — 每个账户永久免费 3 次生成，付费套餐解锁更多
+
+## 商业模式
+
+| 套餐 | 次数 | 价格 | 折扣 |
+|------|------|------|------|
+| 免费 | 永久 3 次 | ¥0 | - |
+| GO level | 5 次 | ¥4.9 | 原价 ¥10，5折 |
+| Plus level | 15 次 | ¥9.9 | 原价 ¥20，5折 |
+| Pro level | 30 次 | ¥14.9 | 原价 ¥30，5折 |
 
 ## 技术栈
 
@@ -27,6 +36,8 @@
 | 样式 | Tailwind CSS v4 |
 | 人脸分析 | Doubao-seed-2.0-mini（火山方舟）/ Mimo-V2.5（DMXAPI） |
 | 图像生成 | Seedream 5.0 Lite（火山方舟） |
+| 用户识别 | Cookie-based session（匿名） |
+| 数据存储 | JSON 文件（轻量级） |
 
 ## 快速开始
 
@@ -66,13 +77,19 @@ CCHair/
 │   ├── page.tsx              # 主页面（Client Component）
 │   ├── globals.css           # 全局样式
 │   └── api/
-│       ├── analyze/route.ts  # 人脸分析 API（双模型切换）
-│       └── generate/route.ts # 发型生成 API
+│       ├── analyze/route.ts  # 人脸分析 API（不扣额度）
+│       ├── generate/route.ts # 发型生成 API（含额度检查）
+│       ├── quota/route.ts    # 额度查询 API
+│       ├── orders/route.ts   # 订单管理 API
+│       └── webhook/route.ts  # 支付回调 API
 ├── lib/
 │   ├── db.ts                 # IndexedDB 操作（历史记录 CRUD）
+│   ├── session.ts            # Cookie session 管理
+│   ├── store.ts              # JSON 文件存储（用户/订单 CRUD）
 │   └── share-card.ts         # Canvas 分享卡片渲染
-├── components/               # React 组件（10个）
+├── components/               # React 组件（12个）
 ├── types/                    # TypeScript 类型 + 发型/颜色数据
+├── data/                     # JSON 文件存储（gitignore）
 ├── public/                   # 静态资源
 ├── Pictures/                 # 示例图片
 ├── CLAUDE.md                 # AI 辅助文档

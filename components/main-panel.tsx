@@ -131,6 +131,9 @@ export default function MainPanel({ loadRecord, onRecordLoaded }: MainPanelProps
           snapshot.push(result);
           resultsRef.current = snapshot;
           setResults([...snapshot]);
+        } else if (data.code === "QUOTA_EXCEEDED") {
+          addError("额度已用完，升级后可继续生成");
+          break;
         } else {
           addError(`「${item.name}」生成失败: ${data.error || "未知错误"}`);
         }

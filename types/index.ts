@@ -91,6 +91,17 @@ export const HAIR_COLORS = [
   { id: "blue-black", name: "蓝黑色", description: "基底为黑色，光线下发蓝调，低调小众，风格清冷。" },
 ];
 
+export interface Order {
+  id: string;
+  sessionId: string;
+  plan: "go" | "plus" | "pro";
+  amount: number;
+  credits: number;
+  status: "pending" | "paid" | "failed";
+  createdAt: number;
+  paidAt?: number;
+}
+
 export const HAIR_CATEGORIES = [
   {
     name: "按长度",

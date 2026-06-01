@@ -38,3 +38,6 @@ Pictures/*-long.png
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# user data (JSON file storage)
+data/
