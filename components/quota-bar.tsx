@@ -7,6 +7,7 @@ import { useFingerprint } from "@/lib/use-fingerprint";
 interface QuotaData {
   freeUsed: number;
   freeLimit: number;
+  freeRemaining: number;
   paidCredits: number;
   totalRemaining: number;
 }
@@ -50,7 +51,13 @@ export default function QuotaBar({ onUpgrade, refreshKey }: QuotaBarProps) {
     <div className="flex items-center gap-2">
       {isFreeUser ? (
         <span className="text-xs text-surface-500">
-          免费额度 <span className="font-semibold text-surface-700">{quota.freeUsed}</span>/{quota.freeLimit} 次
+          {isExhausted ? (
+            "免费额度已用完"
+          ) : (
+            <>
+              免费额度剩余 <span className="font-semibold text-surface-700">{quota.freeRemaining}</span> 次
+            </>
+          )}
         </span>
       ) : (
         <span className="text-xs text-surface-500">

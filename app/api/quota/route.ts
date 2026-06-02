@@ -15,6 +15,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       freeUsed: FREE_CREDITS - quota.freeRemaining,
       freeLimit: FREE_CREDITS,
+      freeRemaining: quota.freeRemaining,
       paidCredits: quota.paidCredits,
       totalRemaining: quota.totalRemaining,
     });
