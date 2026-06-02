@@ -1,6 +1,6 @@
 # CCHair - AI 发型设计
 
-**v1.2** — Freemium 额度系统 + Vercel 部署
+**v1.3** — FingerprintJS 指纹识别 + 管理员无限额度 + API 重试机制
 
 ## 项目概述
 上传人像照，AI 分析脸型五官，生成多款发型效果图。
@@ -10,8 +10,8 @@
 - **样式**: Tailwind CSS v4
 - **人脸分析**: Mimo-V2.5 (DMXAPI, OpenAI 格式)
 - **图像生成**: Seedream 5.0 Lite (火山方舟, images/generations API)
-- **用户识别**: Cookie-based session（匿名，无注册）
-- **数据存储**: JSON 文件 + 内存缓存（Vercel Serverless 兼容）
+- **用户识别**: FingerprintJS 浏览器指纹（匿名，无注册）
+- **数据存储**: Upstash Redis（持久化额度/订单数据）
 - **部署**: Vercel（自动 SSL + 边缘网络）
 
 ## 目录结构
@@ -21,15 +21,15 @@
 │   ├── page.tsx            # 主页面（Client Component，管理历史状态）
 │   ├── globals.css         # Tailwind 全局样式
 │   └── api/
-│       ├── analyze/route.ts    # 人脸分析（双模型，不扣额度）
-│       ├── generate/route.ts   # 发型生成（含额度检查 + 扣减）
-│       ├── quota/route.ts      # GET 额度查询
+│       ├── analyze/route.ts    # 人脸分析（双模型，不扣额度，含重试）
+│       ├── generate/route.ts   # 发型生成（含额度检查 + 扣减 + 管理员豁免）
+│       ├── quota/route.ts      # POST 额度查询（含管理员识别）
 │       ├── orders/route.ts     # GET/POST 订单管理
 │       └── webhook/route.ts    # POST 支付回调
 ├── lib/
 │   ├── db.ts               # IndexedDB 操作（history CRUD）
-│   ├── session.ts          # Cookie session 管理
-│   ├── store.ts            # JSON 文件存储（用户/订单 CRUD）
+│   ├── use-fingerprint.ts  # FingerprintJS hook（浏览器指纹）
+│   ├── store.ts            # Upstash Redis 存储（用户/订单 CRUD）
 │   └── share-card.ts       # Canvas 分享卡片渲染
 ├── components/
 │   ├── header.tsx           # 顶部导航（含额度栏 + 套餐购买入口）
@@ -41,7 +41,7 @@
 │   ├── result-grid.tsx      # 结果网格（含分享卡片按钮）
 │   ├── result-card.tsx      # 单个结果（放大/下载/分享）
 │   ├── toast.tsx            # Toast 通知组件
-│   ├── quota-bar.tsx        # 额度状态栏（Header 右侧）
+│   ├── quota-bar.tsx        # 额度状态栏（管理员/免费/付费用户区分显示）
 │   ├── plan-selector.tsx    # 套餐购买弹窗
 │   └── index.ts             # 统一导出
 ├── types/
@@ -55,7 +55,7 @@
 ```
 
 ## 环境变量
-在 `.env.local` 中配置：
+在 `.env.local` 或 Vercel Dashboard 中配置：
 ```
 # 发型生成 (Seedream 5.0 Lite)
 ARK_API_KEY=你的火山方舟API Key
@@ -65,6 +65,11 @@ ARK_BASE_URL=https://ark.cn-beijing.volces.com/api/v3
 # 人脸分析 - DMXAPI (Mimo-V2.5)，可选
 DMXAPI_KEY=你的DMXAPI Key
 DMXAPI_BASE_URL=https://www.dmxapi.cn/v1
+# Upstash Redis（额度持久化）
+UPSTASH_REDIS_REST_URL=你的Upstash Redis URL
+UPSTASH_REDIS_REST_TOKEN=你的Upstash Redis Token
+# 管理员指纹（无限额度，可选）
+ADMIN_FINGERPRINT=管理员浏览器指纹ID
 ```
 
 ## 开发命令
@@ -77,41 +82,43 @@ npm run lint      # 代码检查
 ## API 参考
 
 ### POST /api/analyze
-人脸分析，使用 Mimo-V2.5（DMXAPI, OpenAI 兼容格式），不扣额度。
+人脸分析，使用 Mimo-V2.5（DMXAPI, OpenAI 兼容格式），不扣额度。含自动重试机制。
 ```json
-// Request: { "image": "base64编码的图片" }
+// Request: { "image": "base64编码的图片", "provider": "dmxapi" }
 // Response: { "analysis": { FaceAnalysis }, "provider": "dmxapi" }
 ```
 
 ### POST /api/generate
-发型生成（含额度检查），调用 Seedream 5.0 Lite。
+发型生成（含额度检查），调用 Seedream 5.0 Lite。含自动重试机制。管理员豁免额度检查。
 ```json
-// Request: { "image": "base64编码的图片", "hairstyle": "发型描述(如微分碎盖)" }
+// Request: { "image": "base64编码的图片", "hairstyle": "发型描述", "fingerprint": "浏览器指纹" }
 // Response: { "image": "base64编码的结果图", "remaining": 剩余次数 }
 // 额度不足: { "error": "额度用完", "code": "QUOTA_EXCEEDED" } (403)
 ```
 
-### GET /api/quota
-查询当前 session 额度。
+### POST /api/quota
+查询当前用户额度（通过 fingerprint 识别）。
 ```json
-// Response: { "freeUsed": N, "freeLimit": 3, "paidCredits": N, "totalRemaining": N }
+// Request: { "fingerprint": "浏览器指纹" }
+// Response: { "freeUsed": N, "freeLimit": 3, "freeRemaining": N, "paidCredits": N, "totalRemaining": N, "isAdmin": true/false }
 ```
 
 ### POST /api/orders
 创建购买订单。
 ```json
-// Request: { "plan": "go" | "plus" | "pro" }
+// Request: { "plan": "go" | "plus" | "pro", "fingerprint": "浏览器指纹" }
 // Response: { "orderId": "xxx", "payUrl": "/pay/xxx", "plan": {...} }
 ```
 
-### GET /api/orders
-查询当前 session 历史订单。
+### GET /api/orders?fingerprint=xxx
+查询当前用户历史订单。
 
 ### POST /api/webhook
 支付平台回调（待对接实际支付平台）。
 
 ## 商业模式
-- **免费额度**：每个账户永久 3 次生成（Cookie session，无需注册）
+- **免费额度**：每个账户永久 3 次生成（FingerprintJS 指纹识别，无需注册）
+- **管理员**：配置 ADMIN_FINGERPRINT 后无限额度
 - **付费套餐**（限时 50% 折扣）：
   - GO level：5 次 / ¥4.9（原价 ¥10）
   - Plus level：15 次 / ¥9.9（原价 ¥20）— 推荐
@@ -122,6 +129,7 @@ npm run lint      # 代码检查
 |------|------|---------|
 | 人脸分析 | Mimo-V2.5 (DMXAPI) | ~0.004元 |
 | 发型生成 | Seedream 5.0 Lite | ~0.25元/张 |
+| 数据存储 | Upstash Redis | 免费额度 10K 命令/天 |
 
 ## 部署信息
 - **生产环境**: https://www.aiheaven.top
@@ -131,12 +139,14 @@ npm run lint      # 代码检查
 ## 项目状态
 ✅ 阶段 1-5.5：核心功能 + 体验优化完成
 ✅ 阶段 6.1：Freemium 额度系统
-  - Cookie-based 匿名 session（1 年有效期）
-  - JSON 文件存储 + 内存缓存（Vercel Serverless 兼容）
+  - FingerprintJS 浏览器指纹识别（替代 Cookie session）
+  - Upstash Redis 持久化存储（替代 JSON 文件）
   - 额度检查注入 generate API（免费 3 次）
+  - 管理员无限额度（ADMIN_FINGERPRINT 环境变量）
   - 额度耗尽自动提示升级
-  - Header 额度状态栏（剩余次数 + 升级按钮）
+  - Header 额度状态栏（管理员/免费/付费用户区分显示）
   - 套餐购买弹窗（GO/Plus/Pro 三列卡片）
+  - API 自动重试机制（缓解网络不稳定）
 ✅ 部署：Vercel 生产环境上线
   - 自动 SSL 证书
   - 边缘网络加速
@@ -145,4 +155,5 @@ npm run lint      # 代码检查
   - [ ] 接入实际支付平台（草莓支付/PayJS 等）
   - [ ] 支付回调签名验证
   - [ ] 支付成功后自动充值额度
-  - [ ] 外部数据库（Vercel KV / Supabase）实现持久化存储
+⬜ 优化项
+  - [ ] 迁移到国内部署平台（解决 Vercel → 国内 API 网络不稳定问题）

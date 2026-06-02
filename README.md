@@ -1,7 +1,7 @@
 # CCHair - AI 发型设计
 
 > 上传人像照，AI 分析脸型五官，一键生成多款发型效果图
-> **v1.2** — 已上线 https://www.aiheaven.top
+> **v1.3** — 已上线 https://www.aiheaven.top
 
 ## 核心功能
 
@@ -36,8 +36,8 @@
 | 样式 | Tailwind CSS v4 |
 | 人脸分析 | Mimo-V2.5 (DMXAPI) |
 | 图像生成 | Seedream 5.0 Lite (火山方舟) |
-| 用户识别 | Cookie-based session（匿名） |
-| 数据存储 | JSON 文件 + 内存缓存 |
+| 用户识别 | FingerprintJS 浏览器指纹（匿名） |
+| 数据存储 | Upstash Redis（持久化额度/订单） |
 | 部署 | Vercel（自动 SSL + 边缘网络） |
 
 ## 快速开始
@@ -52,12 +52,14 @@ npm install
 ```
 # 发型生成 (Seedream 5.0 Lite)
 ARK_API_KEY=你的火山方舟API Key
-# 人脸分析 (Doubao-seed-2.0-mini)
-ARK_API_KEY_ANALYZE=你的火山方舟API Key
-ARK_BASE_URL=https://ark.cn-beijing.volces.com/api/v3
-# 人脸分析 (Mimo-V2.5)，可选
+# 人脸分析 (Mimo-V2.5)
 DMXAPI_KEY=你的DMXAPI Key
 DMXAPI_BASE_URL=https://www.dmxapi.cn/v1
+# Upstash Redis（额度持久化）
+UPSTASH_REDIS_REST_URL=你的Upstash Redis URL
+UPSTASH_REDIS_REST_TOKEN=你的Upstash Redis Token
+# 管理员指纹（无限额度，可选）
+ADMIN_FINGERPRINT=管理员浏览器指纹ID
 ```
 
 > 需要先开通 [火山方舟](https://www.volcengine.com/product/ark) 服务，获取 API Key，并开通相应模型。
@@ -78,19 +80,18 @@ CCHair/
 │   ├── page.tsx              # 主页面（Client Component）
 │   ├── globals.css           # 全局样式
 │   └── api/
-│       ├── analyze/route.ts  # 人脸分析 API（不扣额度）
-│       ├── generate/route.ts # 发型生成 API（含额度检查）
+│       ├── analyze/route.ts  # 人脸分析 API（不扣额度，含重试）
+│       ├── generate/route.ts # 发型生成 API（含额度检查 + 管理员豁免）
 │       ├── quota/route.ts    # 额度查询 API
 │       ├── orders/route.ts   # 订单管理 API
 │       └── webhook/route.ts  # 支付回调 API
 ├── lib/
 │   ├── db.ts                 # IndexedDB 操作（历史记录 CRUD）
-│   ├── session.ts            # Cookie session 管理
-│   ├── store.ts              # JSON 文件存储（用户/订单 CRUD）
+│   ├── use-fingerprint.ts    # FingerprintJS hook（浏览器指纹）
+│   ├── store.ts              # Upstash Redis 存储（用户/订单 CRUD）
 │   └── share-card.ts         # Canvas 分享卡片渲染
 ├── components/               # React 组件（12个）
 ├── types/                    # TypeScript 类型 + 发型/颜色数据
-├── data/                     # JSON 文件存储（gitignore）
 ├── public/                   # 静态资源
 ├── Pictures/                 # 示例图片
 ├── CLAUDE.md                 # AI 辅助文档
@@ -103,6 +104,7 @@ CCHair/
 |------|------|---------|
 | 人脸分析 | Mimo-V2.5 (DMXAPI) | ~0.004元 |
 | 发型生成 | Seedream 5.0 Lite | ~0.25元/张 |
+| 数据存储 | Upstash Redis | 免费额度 10K 命令/天 |
 
 ## 在线访问
 
