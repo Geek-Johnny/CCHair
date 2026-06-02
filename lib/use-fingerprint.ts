@@ -21,6 +21,7 @@ export function useFingerprint() {
     getFingerprint()
       .then((agent) => agent.get())
       .then((result) => {
+        localStorage.setItem("cchair_fp", result.visitorId);
         setFingerprint(result.visitorId);
       })
       .catch(() => {
