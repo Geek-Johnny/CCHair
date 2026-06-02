@@ -31,7 +31,10 @@ export async function POST(request: NextRequest) {
 
     const prompt = `将图中人物的发型换成${hairstyle}，保持五官、脸型和肤色完全不变，可以略微美化一下脸上的瑕疵，正面照，高质量，写实风格`;
 
-    const response = await fetch(`${ARK_BASE_URL}/images/generations`, {
+    const url = `${ARK_BASE_URL}/images/generations`;
+    console.log("Seedream API 调用:", url, "model: doubao-seedream-5-0-260128");
+
+    const response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -76,10 +79,13 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("发型生成失败:", error);
+    console.error("ARK_BASE_URL:", ARK_BASE_URL);
+    console.error("ARK_API_KEY exists:", !!ARK_API_KEY);
     const statusCode = error instanceof Error && error.message === "QUOTA_EXCEEDED" ? 403 : 500;
     const code = error instanceof Error && error.message === "QUOTA_EXCEEDED" ? "QUOTA_EXCEEDED" : undefined;
+    const errMsg = error instanceof Error ? `${error.name}: ${error.message}` : "生成失败";
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "生成失败", code },
+      { error: errMsg, code },
       { status: statusCode }
     );
   }
