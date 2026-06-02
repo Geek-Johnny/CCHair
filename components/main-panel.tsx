@@ -22,9 +22,10 @@ interface GeneratingState {
 interface MainPanelProps {
   loadRecord?: HistoryRecord | null;
   onRecordLoaded?: () => void;
+  onQuotaRefresh?: () => void;
 }
 
-export default function MainPanel({ loadRecord, onRecordLoaded }: MainPanelProps) {
+export default function MainPanel({ loadRecord, onRecordLoaded, onQuotaRefresh }: MainPanelProps) {
   const fingerprint = useFingerprint();
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<FaceAnalysis | null>(null);
@@ -133,12 +134,14 @@ export default function MainPanel({ loadRecord, onRecordLoaded }: MainPanelProps
         } else {
           addError(`「${item.name}」生成失败: ${data.error || "未知错误"}`);
         }
-      } catch {
-        addError(`「${item.name}」网络错误，请重试`);
+      } catch (err) {
+        console.error(`生成失败 [${item.name}]:`, err);
+        addError(`「${item.name}」生成失败，请重试`);
       }
     }
 
     setGenerating({ active: false, current: 0, total: 0 });
+    onQuotaRefresh?.();
 
     // Update IndexedDB record with full results
     const id = recordIdRef.current;

@@ -7,9 +7,10 @@ import PlanSelector from "@/components/plan-selector";
 
 interface HeaderProps {
   onHistoryClick?: () => void;
+  quotaRefreshKey?: number;
 }
 
-export default function Header({ onHistoryClick }: HeaderProps) {
+export default function Header({ onHistoryClick, quotaRefreshKey }: HeaderProps) {
   const [showPlans, setShowPlans] = useState(false);
 
   return (
@@ -23,7 +24,7 @@ export default function Header({ onHistoryClick }: HeaderProps) {
           </span>
           <span className="text-sm text-surface-500">AI 发型设计</span>
           <div className="ml-auto flex items-center gap-3">
-            <QuotaBar onUpgrade={() => setShowPlans(true)} />
+            <QuotaBar onUpgrade={() => setShowPlans(true)} refreshKey={quotaRefreshKey} />
             <button
               onClick={onHistoryClick}
               className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-surface-500 transition-colors hover:bg-surface-100 hover:text-surface-700"

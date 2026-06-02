@@ -9,6 +9,7 @@ import type { HistoryRecord } from "@/types";
 export default function Home() {
   const [showHistory, setShowHistory] = useState(false);
   const [loadRecord, setLoadRecord] = useState<HistoryRecord | null>(null);
+  const [quotaRefreshKey, setQuotaRefreshKey] = useState(0);
 
   const handleLoadRecord = useCallback((record: HistoryRecord) => {
     setLoadRecord(record);
@@ -19,13 +20,18 @@ export default function Home() {
     setLoadRecord(null);
   }, []);
 
+  const handleQuotaRefresh = useCallback(() => {
+    setQuotaRefreshKey((k) => k + 1);
+  }, []);
+
   return (
     <div className="flex min-h-screen flex-col">
-      <Header onHistoryClick={() => setShowHistory(true)} />
+      <Header onHistoryClick={() => setShowHistory(true)} quotaRefreshKey={quotaRefreshKey} />
       <main className="flex-1">
         <MainPanel
           loadRecord={loadRecord}
           onRecordLoaded={handleRecordLoaded}
+          onQuotaRefresh={handleQuotaRefresh}
         />
       </main>
       {showHistory && (

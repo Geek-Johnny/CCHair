@@ -13,13 +13,15 @@ interface QuotaData {
 
 interface QuotaBarProps {
   onUpgrade?: () => void;
+  refreshKey?: number;
 }
 
-export default function QuotaBar({ onUpgrade }: QuotaBarProps) {
+export default function QuotaBar({ onUpgrade, refreshKey }: QuotaBarProps) {
   const fingerprint = useFingerprint();
   const [quota, setQuota] = useState<QuotaData | null>(null);
 
   const fetchQuota = useCallback(async () => {
+    if (!fingerprint) return;
     try {
       const res = await fetch("/api/quota", {
         method: "POST",
@@ -36,10 +38,8 @@ export default function QuotaBar({ onUpgrade }: QuotaBarProps) {
   }, [fingerprint]);
 
   useEffect(() => {
-    if (fingerprint) {
-      fetchQuota();
-    }
-  }, [fingerprint, fetchQuota]);
+    fetchQuota();
+  }, [fetchQuota, refreshKey]);
 
   if (!quota) return null;
 
