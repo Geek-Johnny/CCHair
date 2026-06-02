@@ -1,5 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 
+async function fetchWithRetry(url: string, options: RequestInit, retries = 2): Promise<Response> {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      const res = await fetch(url, options);
+      return res;
+    } catch (err) {
+      if (i === retries) throw err;
+      await new Promise((r) => setTimeout(r, 1000 * (i + 1)));
+    }
+  }
+  throw new Error("unreachable");
+}
+
 // 火山方舟 (Doubao-seed-2.0-mini)
 const ARK_API_KEY = process.env.ARK_API_KEY_ANALYZE || process.env.ARK_API_KEY;
 const ARK_BASE_URL = process.env.ARK_BASE_URL || "https://ark.cn-beijing.volces.com/api/v3";
@@ -34,7 +47,7 @@ async function analyzeWithVolcano(image: string) {
     throw new Error("火山方舟 API 密钥未配置");
   }
 
-  const response = await fetch(`${ARK_BASE_URL}/responses`, {
+  const response = await fetchWithRetry(`${ARK_BASE_URL}/responses`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -74,7 +87,7 @@ async function analyzeWithDmxapi(image: string) {
     throw new Error("DMXAPI 密钥未配置");
   }
 
-  const response = await fetch(`${DMXAPI_BASE_URL}/chat/completions`, {
+  const response = await fetchWithRetry(`${DMXAPI_BASE_URL}/chat/completions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

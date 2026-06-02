@@ -1,8 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkQuota, consumeQuota } from "@/lib/store";
 
+async function fetchWithRetry(url: string, options: RequestInit, retries = 2): Promise<Response> {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      return await fetch(url, options);
+    } catch (err) {
+      if (i === retries) throw err;
+      await new Promise((r) => setTimeout(r, 1000 * (i + 1)));
+    }
+  }
+  throw new Error("unreachable");
+}
+
 const ARK_API_KEY = process.env.ARK_API_KEY;
 const ARK_BASE_URL = process.env.ARK_BASE_URL || "https://ark.cn-beijing.volces.com/api/v3";
+const ADMIN_FINGERPRINT = process.env.ADMIN_FINGERPRINT;
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,13 +33,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "API 密钥未配置" }, { status: 500 });
     }
 
-    // Quota check using fingerprint
-    const quota = await checkQuota(fingerprint);
-    if (!quota.available) {
-      return NextResponse.json(
-        { error: "免费额度已用完，请升级获取更多次数", code: "QUOTA_EXCEEDED" },
-        { status: 403 }
-      );
+    // Quota check using fingerprint (admin bypass)
+    const isAdmin = ADMIN_FINGERPRINT && fingerprint === ADMIN_FINGERPRINT;
+    if (!isAdmin) {
+      const quota = await checkQuota(fingerprint);
+      if (!quota.available) {
+        return NextResponse.json(
+          { error: "免费额度已用完，请升级获取更多次数", code: "QUOTA_EXCEEDED" },
+          { status: 403 }
+        );
+      }
     }
 
     const prompt = `将图中人物的发型换成${hairstyle}，保持五官、脸型和肤色完全不变，可以略微美化一下脸上的瑕疵，正面照，高质量，写实风格`;
@@ -34,7 +50,7 @@ export async function POST(request: NextRequest) {
     const url = `${ARK_BASE_URL}/images/generations`;
     console.log("Seedream API 调用:", url, "model: doubao-seedream-5-0-260128");
 
-    const response = await fetch(url, {
+    const response = await fetchWithRetry(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -66,12 +82,14 @@ export async function POST(request: NextRequest) {
     }
 
     // 下载生成的图片并转为 base64（避免 URL 过期）
-    const imageResponse = await fetch(imageUrl);
+    const imageResponse = await fetchWithRetry(imageUrl, {});
     const imageBuffer = await imageResponse.arrayBuffer();
     const imageBase64 = Buffer.from(imageBuffer).toString("base64");
 
-    // Consume quota after successful generation
-    const remaining = await consumeQuota(fingerprint);
+    // Consume quota after successful generation (admin skip)
+    const remaining = isAdmin
+      ? { totalRemaining: Infinity }
+      : await consumeQuota(fingerprint);
 
     return NextResponse.json({
       image: imageBase64,
