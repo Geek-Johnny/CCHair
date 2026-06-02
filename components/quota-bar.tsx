@@ -10,6 +10,7 @@ interface QuotaData {
   freeRemaining: number;
   paidCredits: number;
   totalRemaining: number;
+  isAdmin?: boolean;
 }
 
 interface QuotaBarProps {
@@ -49,7 +50,9 @@ export default function QuotaBar({ onUpgrade, refreshKey }: QuotaBarProps) {
 
   return (
     <div className="flex items-center gap-2">
-      {isFreeUser ? (
+      {quota.isAdmin ? (
+        <span className="text-xs text-green-600 font-medium">管理员 · 无限额度</span>
+      ) : isFreeUser ? (
         <span className="text-xs text-surface-500">
           {isExhausted ? (
             "免费额度已用完"
@@ -65,7 +68,7 @@ export default function QuotaBar({ onUpgrade, refreshKey }: QuotaBarProps) {
         </span>
       )}
 
-      {isExhausted && (
+      {!quota.isAdmin && isExhausted && (
         <button
           onClick={onUpgrade}
           className="flex items-center gap-1 rounded-md bg-orange-500 px-2 py-1 text-xs font-medium text-white transition-colors hover:bg-orange-600"
