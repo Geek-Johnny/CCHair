@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Zap } from "lucide-react";
+import { useFingerprint } from "@/lib/use-fingerprint";
 
 interface QuotaData {
   freeUsed: number;
@@ -15,15 +16,16 @@ interface QuotaBarProps {
 }
 
 export default function QuotaBar({ onUpgrade }: QuotaBarProps) {
+  const fingerprint = useFingerprint();
   const [quota, setQuota] = useState<QuotaData | null>(null);
 
-  useEffect(() => {
-    fetchQuota();
-  }, []);
-
-  const fetchQuota = async () => {
+  const fetchQuota = useCallback(async () => {
     try {
-      const res = await fetch("/api/quota");
+      const res = await fetch("/api/quota", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fingerprint }),
+      });
       if (res.ok) {
         const data = await res.json();
         setQuota(data);
@@ -31,7 +33,13 @@ export default function QuotaBar({ onUpgrade }: QuotaBarProps) {
     } catch {
       // Silently fail
     }
-  };
+  }, [fingerprint]);
+
+  useEffect(() => {
+    if (fingerprint) {
+      fetchQuota();
+    }
+  }, [fingerprint, fetchQuota]);
 
   if (!quota) return null;
 

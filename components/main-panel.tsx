@@ -9,6 +9,7 @@ import ToastContainer, { useToastManager } from "@/components/toast";
 import type { FaceAnalysis, GenerationResult, GenerateItem, HistoryRecord } from "@/types";
 import { POPULAR_HAIRSTYLES } from "@/types";
 import { saveRecord, updateRecordResults } from "@/lib/db";
+import { useFingerprint } from "@/lib/use-fingerprint";
 
 const ANALYZE_PROVIDER = "dmxapi";
 
@@ -24,6 +25,7 @@ interface MainPanelProps {
 }
 
 export default function MainPanel({ loadRecord, onRecordLoaded }: MainPanelProps) {
+  const fingerprint = useFingerprint();
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<FaceAnalysis | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
@@ -111,7 +113,7 @@ export default function MainPanel({ loadRecord, onRecordLoaded }: MainPanelProps
         const res = await fetch("/api/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ image: originalImage, hairstyle: item.hairstyle }),
+          body: JSON.stringify({ image: originalImage, hairstyle: item.hairstyle, fingerprint }),
         });
         const data = await res.json();
         if (res.ok) {
@@ -192,39 +194,42 @@ export default function MainPanel({ loadRecord, onRecordLoaded }: MainPanelProps
   return (
     <>
       <ToastContainer toasts={toasts} onRemove={removeToast} />
-      <div className="mx-auto flex h-[calc(100vh-3.5rem)] max-w-7xl flex-col gap-4 p-4 md:flex-row">
-        {/* 左侧面板 */}
-        <div className="flex max-h-[50vh] w-full flex-col gap-4 overflow-y-auto md:max-h-none md:w-[400px] md:shrink-0">
-          <UploadArea
-            onImageUpload={handleImageUpload}
-            onError={addError}
-            currentImage={originalImage}
-            disabled={isBusy}
-          />
-          {(analyzing || analysisError || analysis) && (
-            <AnalysisCard analysis={analysis} loading={analyzing} error={analysisError} />
-          )}
-        </div>
-
-        {/* 右侧面板 */}
-        <div className="flex flex-1 flex-col gap-4 overflow-y-auto pb-4">
-          {originalImage && (
-            <HairStyleSelector
-              key={originalImage.slice(-20)}
-              onGenerate={handleGenerate}
-              onRandomGenerate={handleRandomGenerate}
-              generating={generating.active}
-              disabled={!analysis}
-              gender={analysis?.gender}
-              recommendedStyles={analysis?.recommendedStyles}
+      {/* 移动端：单列滚动 | 桌面端：左右分栏 */}
+      <div className="mx-auto max-w-7xl p-4 pb-20 md:h-[calc(100vh-3.5rem)] md:overflow-y-auto md:pb-4">
+        <div className="flex flex-col gap-4 md:h-full md:flex-row">
+          {/* 左侧面板 */}
+          <div className="flex w-full flex-col gap-4 md:max-h-none md:w-[400px] md:shrink-0 md:overflow-y-auto">
+            <UploadArea
+              onImageUpload={handleImageUpload}
+              onError={addError}
+              currentImage={originalImage}
+              disabled={isBusy}
             />
-          )}
-          <ResultGrid
-            results={results}
-            generating={generating}
-            originalImage={originalImage}
-            analysis={analysis}
-          />
+            {(analyzing || analysisError || analysis) && (
+              <AnalysisCard analysis={analysis} loading={analyzing} error={analysisError} />
+            )}
+          </div>
+
+          {/* 右侧面板 */}
+          <div className="flex flex-1 flex-col gap-4 md:overflow-y-auto">
+            {originalImage && (
+              <HairStyleSelector
+                key={originalImage.slice(-20)}
+                onGenerate={handleGenerate}
+                onRandomGenerate={handleRandomGenerate}
+                generating={generating.active}
+                disabled={!analysis}
+                gender={analysis?.gender}
+                recommendedStyles={analysis?.recommendedStyles}
+              />
+            )}
+            <ResultGrid
+              results={results}
+              generating={generating}
+              originalImage={originalImage}
+              analysis={analysis}
+            />
+          </div>
         </div>
       </div>
     </>

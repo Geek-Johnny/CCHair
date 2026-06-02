@@ -3,21 +3,28 @@
 import { useState } from "react";
 import { Check, X, Sparkles, Loader2 } from "lucide-react";
 import { PLANS, type PlanKey } from "@/types/plan";
+import { useFingerprint } from "@/lib/use-fingerprint";
 
 interface PlanSelectorProps {
   onClose: () => void;
 }
 
 export default function PlanSelector({ onClose }: PlanSelectorProps) {
+  const fingerprint = useFingerprint();
   const [purchasing, setPurchasing] = useState<PlanKey | null>(null);
 
   const handlePurchase = async (plan: PlanKey) => {
+    if (!fingerprint) {
+      alert("正在获取用户标识，请稍后重试");
+      return;
+    }
+
     setPurchasing(plan);
     try {
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan }),
+        body: JSON.stringify({ plan, fingerprint }),
       });
       const data = await res.json();
       if (res.ok) {
@@ -114,7 +121,7 @@ export default function PlanSelector({ onClose }: PlanSelectorProps) {
 
                 <button
                   onClick={() => handlePurchase(key)}
-                  disabled={purchasing !== null}
+                  disabled={purchasing !== null || !fingerprint}
                   className={`w-full rounded-lg py-2.5 text-sm font-medium transition-colors ${
                     recommended
                       ? "bg-primary-500 text-white hover:bg-primary-600 disabled:opacity-50"

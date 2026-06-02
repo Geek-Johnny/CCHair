@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSessionId, setSessionCookie } from "@/lib/session";
 import { checkQuota, consumeQuota } from "@/lib/store";
 
 const ARK_API_KEY = process.env.ARK_API_KEY;
@@ -7,26 +6,27 @@ const ARK_BASE_URL = process.env.ARK_BASE_URL || "https://ark.cn-beijing.volces.
 
 export async function POST(request: NextRequest) {
   try {
-    const { image, hairstyle } = await request.json();
+    const { image, hairstyle, fingerprint } = await request.json();
 
     if (!image || !hairstyle) {
       return NextResponse.json({ error: "请提供图片和发型描述" }, { status: 400 });
+    }
+
+    if (!fingerprint) {
+      return NextResponse.json({ error: "用户标识缺失" }, { status: 400 });
     }
 
     if (!ARK_API_KEY) {
       return NextResponse.json({ error: "API 密钥未配置" }, { status: 500 });
     }
 
-    // Quota check
-    const sessionId = await getSessionId();
-    const quota = await checkQuota(sessionId);
+    // Quota check using fingerprint
+    const quota = await checkQuota(fingerprint);
     if (!quota.available) {
-      const response = NextResponse.json(
-        { error: "今日免费额度已用完，请升级获取更多次数", code: "QUOTA_EXCEEDED" },
+      return NextResponse.json(
+        { error: "免费额度已用完，请升级获取更多次数", code: "QUOTA_EXCEEDED" },
         { status: 403 }
       );
-      response.headers.set("Set-Cookie", setSessionCookie(sessionId));
-      return response;
     }
 
     const prompt = `将图中人物的发型换成${hairstyle}，保持五官、脸型和肤色完全不变，可以略微美化一下脸上的瑕疵，正面照，高质量，写实风格`;
@@ -68,14 +68,12 @@ export async function POST(request: NextRequest) {
     const imageBase64 = Buffer.from(imageBuffer).toString("base64");
 
     // Consume quota after successful generation
-    const remaining = await consumeQuota(sessionId);
+    const remaining = await consumeQuota(fingerprint);
 
-    const apiResponse = NextResponse.json({
+    return NextResponse.json({
       image: imageBase64,
       remaining: remaining.totalRemaining,
     });
-    apiResponse.headers.set("Set-Cookie", setSessionCookie(sessionId));
-    return apiResponse;
   } catch (error) {
     console.error("发型生成失败:", error);
     const statusCode = error instanceof Error && error.message === "QUOTA_EXCEEDED" ? 403 : 500;
