@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { Download, Expand, Share2 } from "lucide-react";
 import type { GenerationResult } from "@/types";
+import { useTranslation } from "@/lib/i18n/hook";
 
 interface ResultCardProps {
   result: GenerationResult;
@@ -13,6 +14,7 @@ function getImageSrc(data: string) {
 }
 
 export default function ResultCard({ result }: ResultCardProps) {
+  const { t } = useTranslation();
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [shared, setShared] = useState(false);
 
@@ -37,7 +39,7 @@ export default function ResultCard({ result }: ResultCardProps) {
   }, [result]);
 
   const handleShare = useCallback(async () => {
-    const text = `看我用 CCHair 生成的「${result.hairstyleName}」发型效果！`;
+    const text = t("result.shareText", { name: result.hairstyleName });
 
     // Web Share API (mobile)
     if (navigator.share) {
@@ -47,7 +49,7 @@ export default function ResultCard({ result }: ResultCardProps) {
         const file = new File([blob], `cchair-${result.hairstyleName}.png`, {
           type: "image/png",
         });
-        await navigator.share({ title: "CCHair 发型效果", text, files: [file] });
+        await navigator.share({ title: t("result.shareTitle"), text, files: [file] });
         return;
       } catch {
         // user cancelled or failed — silently fall through to clipboard
@@ -62,7 +64,7 @@ export default function ResultCard({ result }: ResultCardProps) {
     } catch {
       // clipboard not available either
     }
-  }, [result]);
+  }, [result, t]);
 
   return (
     <>
@@ -105,7 +107,7 @@ export default function ResultCard({ result }: ResultCardProps) {
               {result.hairstyleName}
             </p>
             {shared && (
-              <span className="text-[10px] text-primary-500">已复制</span>
+              <span className="text-[10px] text-primary-500">{t("result.copied")}</span>
             )}
           </div>
           <div className="mt-1 flex flex-wrap gap-1">

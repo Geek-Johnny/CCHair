@@ -1,0 +1,122 @@
+{
+  "common": {
+    "generating": "生成中",
+    "retry": "重试",
+    "confirm": "确认",
+    "cancel": "取消"
+  },
+  "header": {
+    "subtitle": "AI 发型设计",
+    "history": "历史记录"
+  },
+  "upload": {
+    "dropzone": "点击或拖拽上传人像照",
+    "formats": "支持 JPG/PNG/WebP",
+    "reupload": "点击重新上传",
+    "previewAlt": "人像预览",
+    "errorType": "仅支持 JPG、PNG、WebP 格式的图片",
+    "errorSize": "图片过大，请压缩至 10MB 以内后重试",
+    "errorProcess": "图片处理失败，请重试"
+  },
+  "analysis": {
+    "title": "人脸分析结果",
+    "error": "分析失败",
+    "errorHint": "请更换图片或切换模型后重试",
+    "faceShape": "脸型",
+    "skinTone": "肤色",
+    "gender": "性别",
+    "ageRange": "年龄段",
+    "features": "五官特征",
+    "eyes": "眼",
+    "eyebrows": "眉",
+    "nose": "鼻",
+    "lips": "唇",
+    "currentHair": "当前发型",
+    "length": "长度",
+    "color": "发色",
+    "style": "风格",
+    "recommended": "推荐发型"
+  },
+  "hairStyle": {
+    "title": "选择发型",
+    "selected": "已选 {count} 款",
+    "random": "随机生成 6 款",
+    "aiRecommended": "AI 推荐发型",
+    "popular": "热门发型",
+    "male": "男生",
+    "female": "女生",
+    "custom": "定制发型",
+    "category": {
+      "length": "按长度",
+      "style": "按风格",
+      "type": "按类型",
+      "color": "按颜色"
+    },
+    "customPlaceholder": "自行输入…",
+    "customCombination": "定制组合",
+    "selectedCount": "已选 {count} 款发型",
+    "generate": "生成选中发型"
+  },
+  "history": {
+    "title": "历史记录",
+    "empty": "暂无历史记录",
+    "resultCount": "{count} 张生成结果",
+    "analysisOnly": "仅完成分析"
+  },
+  "result": {
+    "total": "共 {count} 张",
+    "shareCard": "生成分享卡片",
+    "downloadAll": "全部下载",
+    "empty": "上传人像照并选择发型后，效果将在这里展示",
+    "generating": "正在生成 {current}/{total}",
+    "shareText": "看我用 CCHair 生成的「{name}」发型效果！",
+    "shareTitle": "CCHair 发型效果",
+    "copied": "已复制"
+  },
+  "quota": {
+    "admin": "管理员 · 无限额度",
+    "freeExhausted": "免费额度已用完",
+    "freeRemaining": "免费额度剩余",
+    "times": "次",
+    "paidRemaining": "剩余",
+    "upgrade": "升级"
+  },
+  "plan": {
+    "discount": "限时 50% 折扣",
+    "title": "选择适合你的套餐",
+    "subtitle": "解锁更多 AI 发型生成次数",
+    "recommended": "推荐",
+    "pricePerUnit": "{credits} 次 · 约 ¥{price}/次",
+    "featureGenerations": "{credits} 次发型生成",
+    "featureStyles": "所有发型风格",
+    "featureDownload": "高清图片下载",
+    "buyNow": "立即购买",
+    "footer": "付费次数永久有效 · 支持微信/支付宝 · 购买即表示同意服务条款",
+    "fingerprintLoading": "正在获取用户标识，请稍后重试",
+    "orderSuccess": "订单创建成功！\n订单号: {orderId}\n支付链接: {payUrl}\n\n（支付功能对接后将自动跳转）",
+    "orderFailed": "创建订单失败",
+    "networkError": "网络错误，请重试"
+  },
+  "mainPanel": {
+    "analysisError": "分析失败，请重试",
+    "networkError": "网络错误，请检查网络后重试",
+    "quotaExceeded": "额度已用完，升级后可继续生成",
+    "generateFailed": "「{name}」生成失败: {error}",
+    "unknownError": "未知错误",
+    "generateFailedRetry": "「{name}」生成失败，请重试"
+  },
+  "shareCard": {
+    "subtitle": "AI 发型设计参考",
+    "recommended": "推荐",
+    "sectionTitle": "AI 推荐发型效果",
+    "footer": "cchair.ai  ·  AI 发型设计参考",
+    "faceShape": "脸型",
+    "skinTone": "肤色",
+    "gender": "性别",
+    "ageRange": "年龄段"
+  },
+  "metadata": {
+    "title": "CCHair - AI 发型设计",
+    "description": "上传人像照，AI 分析脸型五官，一键生成多款发型效果图"
+  }
+}

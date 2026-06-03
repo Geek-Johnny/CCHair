@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Zap } from "lucide-react";
 import { useFingerprint } from "@/lib/use-fingerprint";
+import { useTranslation } from "@/lib/i18n/hook";
 
 interface QuotaData {
   freeUsed: number;
@@ -19,6 +20,7 @@ interface QuotaBarProps {
 }
 
 export default function QuotaBar({ onUpgrade, refreshKey }: QuotaBarProps) {
+  const { t } = useTranslation();
   const fingerprint = useFingerprint();
   const [quota, setQuota] = useState<QuotaData | null>(null);
 
@@ -51,20 +53,20 @@ export default function QuotaBar({ onUpgrade, refreshKey }: QuotaBarProps) {
   return (
     <div className="flex items-center gap-2">
       {quota.isAdmin ? (
-        <span className="text-xs text-green-600 font-medium">管理员 · 无限额度</span>
+        <span className="text-xs text-green-600 font-medium">{t("quota.admin")}</span>
       ) : isFreeUser ? (
         <span className="text-xs text-surface-500">
           {isExhausted ? (
-            "免费额度已用完"
+            t("quota.freeExhausted")
           ) : (
             <>
-              免费额度剩余 <span className="font-semibold text-surface-700">{quota.freeRemaining}</span> 次
+              {t("quota.freeRemaining")} <span className="font-semibold text-surface-700">{quota.freeRemaining}</span> {t("quota.times")}
             </>
           )}
         </span>
       ) : (
         <span className="text-xs text-surface-500">
-          剩余 <span className="font-semibold text-surface-700">{quota.totalRemaining}</span> 次
+          {t("quota.paidRemaining")} <span className="font-semibold text-surface-700">{quota.totalRemaining}</span> {t("quota.times")}
         </span>
       )}
 
@@ -74,7 +76,7 @@ export default function QuotaBar({ onUpgrade, refreshKey }: QuotaBarProps) {
           className="flex items-center gap-1 rounded-md bg-orange-500 px-2 py-1 text-xs font-medium text-white transition-colors hover:bg-orange-600"
         >
           <Zap className="h-3 w-3" />
-          升级
+          {t("quota.upgrade")}
         </button>
       )}
     </div>

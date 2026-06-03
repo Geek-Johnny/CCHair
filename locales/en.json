@@ -1,0 +1,122 @@
+{
+  "common": {
+    "generating": "Generating",
+    "retry": "Retry",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
+  },
+  "header": {
+    "subtitle": "AI Hairstyle Design",
+    "history": "History"
+  },
+  "upload": {
+    "dropzone": "Click or drag to upload a portrait photo",
+    "formats": "Supports JPG/PNG/WebP",
+    "reupload": "Click to reupload",
+    "previewAlt": "Portrait preview",
+    "errorType": "Only JPG, PNG, WebP images are supported",
+    "errorSize": "Image too large, please compress to under 10MB",
+    "errorProcess": "Image processing failed, please retry"
+  },
+  "analysis": {
+    "title": "Face Analysis Results",
+    "error": "Analysis Failed",
+    "errorHint": "Please try a different photo or model",
+    "faceShape": "Face Shape",
+    "skinTone": "Skin Tone",
+    "gender": "Gender",
+    "ageRange": "Age Range",
+    "features": "Facial Features",
+    "eyes": "Eyes",
+    "eyebrows": "Eyebrows",
+    "nose": "Nose",
+    "lips": "Lips",
+    "currentHair": "Current Hair",
+    "length": "Length",
+    "color": "Color",
+    "style": "Style",
+    "recommended": "Recommended Styles"
+  },
+  "hairStyle": {
+    "title": "Choose Hairstyle",
+    "selected": "{count} selected",
+    "random": "Random 6 Styles",
+    "aiRecommended": "AI Recommended",
+    "popular": "Popular Styles",
+    "male": "Male",
+    "female": "Female",
+    "custom": "Custom Style",
+    "category": {
+      "length": "By Length",
+      "style": "By Style",
+      "type": "By Type",
+      "color": "By Color"
+    },
+    "customPlaceholder": "Custom input…",
+    "customCombination": "Custom Combo",
+    "selectedCount": "{count} hairstyles selected",
+    "generate": "Generate Selected"
+  },
+  "history": {
+    "title": "History",
+    "empty": "No history yet",
+    "resultCount": "{count} generated results",
+    "analysisOnly": "Analysis only"
+  },
+  "result": {
+    "total": "{count} total",
+    "shareCard": "Share Card",
+    "downloadAll": "Download All",
+    "empty": "Upload a portrait and choose a hairstyle to see results here",
+    "generating": "Generating {current}/{total}",
+    "shareText": "Check out my \"{name}\" hairstyle generated with CCHair!",
+    "shareTitle": "CCHair Hairstyle Result",
+    "copied": "Copied"
+  },
+  "quota": {
+    "admin": "Admin · Unlimited",
+    "freeExhausted": "Free quota used up",
+    "freeRemaining": "Free uses remaining",
+    "times": "uses",
+    "paidRemaining": "Remaining",
+    "upgrade": "Upgrade"
+  },
+  "plan": {
+    "discount": "50% Off Limited Offer",
+    "title": "Choose Your Plan",
+    "subtitle": "Unlock more AI hairstyle generations",
+    "recommended": "Recommended",
+    "pricePerUnit": "{credits} uses · ~¥{price}/use",
+    "featureGenerations": "{credits} hairstyle generations",
+    "featureStyles": "All hairstyle styles",
+    "featureDownload": "HD image download",
+    "buyNow": "Buy Now",
+    "footer": "Credits never expire · WeChat/Alipay supported · Purchase implies agreement to terms",
+    "fingerprintLoading": "Getting user identity, please wait...",
+    "orderSuccess": "Order created!\nOrder ID: {orderId}\nPayment link: {payUrl}\n\n(Payment integration coming soon)",
+    "orderFailed": "Failed to create order",
+    "networkError": "Network error, please retry"
+  },
+  "mainPanel": {
+    "analysisError": "Analysis failed, please retry",
+    "networkError": "Network error, please check your connection",
+    "quotaExceeded": "Quota used up, upgrade to continue generating",
+    "generateFailed": "\"{name}\" generation failed: {error}",
+    "unknownError": "Unknown error",
+    "generateFailedRetry": "\"{name}\" generation failed, please retry"
+  },
+  "shareCard": {
+    "subtitle": "AI Hairstyle Design",
+    "recommended": "Recommended",
+    "sectionTitle": "AI Recommended Hairstyles",
+    "footer": "cchair.ai  ·  AI Hairstyle Design",
+    "faceShape": "Face",
+    "skinTone": "Skin",
+    "gender": "Gender",
+    "ageRange": "Age"
+  },
+  "metadata": {
+    "title": "CCHair - AI Hairstyle Design",
+    "description": "Upload a portrait photo, AI analyzes your face shape, generate multiple hairstyle designs"
+  }
+}

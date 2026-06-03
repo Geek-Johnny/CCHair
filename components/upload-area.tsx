@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { Upload } from "lucide-react";
+import { useTranslation } from "@/lib/i18n/hook";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_SIZE_MB = 10;
@@ -56,27 +57,28 @@ interface UploadAreaProps {
 }
 
 export default function UploadArea({ onImageUpload, onError, currentImage, disabled }: UploadAreaProps) {
+  const { t } = useTranslation();
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = useCallback(
     async (file: File) => {
       if (!ALLOWED_TYPES.includes(file.type)) {
-        onError?.("仅支持 JPG、PNG、WebP 格式的图片");
+        onError?.(t("upload.errorType"));
         return;
       }
       if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-        onError?.("图片过大，请压缩至 10MB 以内后重试");
+        onError?.(t("upload.errorSize"));
         return;
       }
       try {
         const base64 = await compressImage(file);
         onImageUpload(base64);
       } catch {
-        onError?.("图片处理失败，请重试");
+        onError?.(t("upload.errorProcess"));
       }
     },
-    [onImageUpload, onError]
+    [onImageUpload, onError, t]
   );
 
   const handleDrop = useCallback(
@@ -118,18 +120,18 @@ export default function UploadArea({ onImageUpload, onError, currentImage, disab
           <div className="relative w-full">
             <img
               src={`data:image/jpeg;base64,${currentImage}`}
-              alt="人像预览"
+              alt={t("upload.previewAlt")}
               className="mx-auto max-h-64 rounded-lg object-contain"
             />
-            <p className="mt-2 text-center text-xs text-surface-500">点击重新上传</p>
+            <p className="mt-2 text-center text-xs text-surface-500">{t("upload.reupload")}</p>
           </div>
         ) : (
           <>
             <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary-50">
               <Upload className="h-5 w-5 text-primary-500" />
             </div>
-            <p className="text-sm font-medium text-surface-700">点击或拖拽上传人像照</p>
-            <p className="mt-1 text-xs text-surface-400">支持 JPG/PNG/WebP</p>
+            <p className="text-sm font-medium text-surface-700">{t("upload.dropzone")}</p>
+            <p className="mt-1 text-xs text-surface-400">{t("upload.formats")}</p>
           </>
         )}
       </div>

@@ -4,18 +4,20 @@ import { useState } from "react";
 import { Check, X, Sparkles, Loader2 } from "lucide-react";
 import { PLANS, type PlanKey } from "@/types/plan";
 import { useFingerprint } from "@/lib/use-fingerprint";
+import { useTranslation } from "@/lib/i18n/hook";
 
 interface PlanSelectorProps {
   onClose: () => void;
 }
 
 export default function PlanSelector({ onClose }: PlanSelectorProps) {
+  const { t } = useTranslation();
   const fingerprint = useFingerprint();
   const [purchasing, setPurchasing] = useState<PlanKey | null>(null);
 
   const handlePurchase = async (plan: PlanKey) => {
     if (!fingerprint) {
-      alert("正在获取用户标识，请稍后重试");
+      alert(t("plan.fingerprintLoading"));
       return;
     }
 
@@ -29,12 +31,12 @@ export default function PlanSelector({ onClose }: PlanSelectorProps) {
       const data = await res.json();
       if (res.ok) {
         // TODO: 跳转实际支付页面
-        alert(`订单创建成功！\n订单号: ${data.orderId}\n支付链接: ${data.payUrl}\n\n（支付功能对接后将自动跳转）`);
+        alert(t("plan.orderSuccess", { orderId: data.orderId, payUrl: data.payUrl }));
       } else {
-        alert(data.error || "创建订单失败");
+        alert(data.error || t("plan.orderFailed"));
       }
     } catch {
-      alert("网络错误，请重试");
+      alert(t("plan.networkError"));
     } finally {
       setPurchasing(null);
     }
@@ -61,10 +63,10 @@ export default function PlanSelector({ onClose }: PlanSelectorProps) {
         <div className="mb-6 text-center">
           <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-primary-50 px-3 py-1 text-sm font-medium text-primary-600">
             <Sparkles className="h-3.5 w-3.5" />
-            限时 50% 折扣
+            {t("plan.discount")}
           </div>
-          <h2 className="text-xl font-bold text-surface-900">选择适合你的套餐</h2>
-          <p className="mt-1 text-sm text-surface-500">解锁更多 AI 发型生成次数</p>
+          <h2 className="text-xl font-bold text-surface-900">{t("plan.title")}</h2>
+          <p className="mt-1 text-sm text-surface-500">{t("plan.subtitle")}</p>
         </div>
 
         {/* Plan cards */}
@@ -85,7 +87,7 @@ export default function PlanSelector({ onClose }: PlanSelectorProps) {
               >
                 {recommended && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary-500 px-3 py-0.5 text-xs font-medium text-white">
-                    推荐
+                    {t("plan.recommended")}
                   </div>
                 )}
 
@@ -100,22 +102,22 @@ export default function PlanSelector({ onClose }: PlanSelectorProps) {
                     <span className="text-sm text-surface-400 line-through">¥{plan.originalPrice / 100}</span>
                   </div>
                   <p className="mt-1 text-xs text-surface-500">
-                    {plan.credits} 次 · 约 ¥{perUnit}/次
+                    {t("plan.pricePerUnit", { credits: plan.credits, price: perUnit })}
                   </p>
                 </div>
 
                 <ul className="mb-5 space-y-2">
                   <li className="flex items-center gap-2 text-sm text-surface-600">
                     <Check className="h-4 w-4 text-primary-500" />
-                    {plan.credits} 次发型生成
+                    {t("plan.featureGenerations", { credits: plan.credits })}
                   </li>
                   <li className="flex items-center gap-2 text-sm text-surface-600">
                     <Check className="h-4 w-4 text-primary-500" />
-                    所有发型风格
+                    {t("plan.featureStyles")}
                   </li>
                   <li className="flex items-center gap-2 text-sm text-surface-600">
                     <Check className="h-4 w-4 text-primary-500" />
-                    高清图片下载
+                    {t("plan.featureDownload")}
                   </li>
                 </ul>
 
@@ -131,7 +133,7 @@ export default function PlanSelector({ onClose }: PlanSelectorProps) {
                   {purchasing === key ? (
                     <Loader2 className="mx-auto h-4 w-4 animate-spin" />
                   ) : (
-                    "立即购买"
+                    t("plan.buyNow")
                   )}
                 </button>
               </div>
@@ -141,7 +143,7 @@ export default function PlanSelector({ onClose }: PlanSelectorProps) {
 
         {/* Footer note */}
         <p className="mt-4 text-center text-xs text-surface-400">
-          付费次数永久有效 · 支持微信/支付宝 · 购买即表示同意服务条款
+          {t("plan.footer")}
         </p>
       </div>
     </div>

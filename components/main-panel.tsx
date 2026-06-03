@@ -10,6 +10,7 @@ import type { FaceAnalysis, GenerationResult, GenerateItem, HistoryRecord } from
 import { POPULAR_HAIRSTYLES } from "@/types";
 import { saveRecord, updateRecordResults } from "@/lib/db";
 import { useFingerprint } from "@/lib/use-fingerprint";
+import { useTranslation } from "@/lib/i18n/hook";
 
 const ANALYZE_PROVIDER = "dmxapi";
 
@@ -26,6 +27,7 @@ interface MainPanelProps {
 }
 
 export default function MainPanel({ loadRecord, onRecordLoaded, onQuotaRefresh }: MainPanelProps) {
+  const { t } = useTranslation();
   const fingerprint = useFingerprint();
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<FaceAnalysis | null>(null);
@@ -86,12 +88,12 @@ export default function MainPanel({ loadRecord, onRecordLoaded, onQuotaRefresh }
         await saveRecord(record);
         recordIdRef.current = id;
       } else {
-        const msg = data.error || "分析失败，请重试";
+        const msg = data.error || t("mainPanel.analysisError");
         setAnalysisError(msg);
         addError(msg);
       }
     } catch (err) {
-      const msg = "网络错误，请检查网络后重试";
+      const msg = t("mainPanel.networkError");
       setAnalysisError(msg);
       addError(msg);
     } finally {
@@ -129,14 +131,14 @@ export default function MainPanel({ loadRecord, onRecordLoaded, onQuotaRefresh }
           resultsRef.current = snapshot;
           setResults([...snapshot]);
         } else if (data.code === "QUOTA_EXCEEDED") {
-          addError("额度已用完，升级后可继续生成");
+          addError(t("mainPanel.quotaExceeded"));
           break;
         } else {
-          addError(`「${item.name}」生成失败: ${data.error || "未知错误"}`);
+          addError(t("mainPanel.generateFailed", { name: item.name, error: data.error || t("mainPanel.unknownError") }));
         }
       } catch (err) {
         console.error(`生成失败 [${item.name}]:`, err);
-        addError(`「${item.name}」生成失败，请重试`);
+        addError(t("mainPanel.generateFailedRetry", { name: item.name }));
       }
     }
 

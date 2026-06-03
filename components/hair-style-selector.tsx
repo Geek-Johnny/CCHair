@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { Sparkles, Flame, Check, Palette, Dice5 } from "lucide-react";
 import { HAIR_CATEGORIES, POPULAR_HAIRSTYLES, HAIR_COLORS } from "@/types";
 import type { GenerateItem } from "@/types";
+import { useTranslation } from "@/lib/i18n/hook";
 
 interface HairStyleSelectorProps {
   onGenerate: (items: GenerateItem[]) => void;
@@ -34,6 +35,7 @@ export default function HairStyleSelector({
   gender,
   recommendedStyles,
 }: HairStyleSelectorProps) {
+  const { t } = useTranslation();
   const [selectedNames, setSelectedNames] = useState<Set<string>>(new Set());
   const [customHair, setCustomHair] = useState<Record<string, CustomSlot>>(EMPTY_CUSTOM);
 
@@ -118,11 +120,11 @@ export default function HairStyleSelector({
       {/* Header */}
       <div className="flex items-center gap-2 px-4 pt-4">
         <Sparkles className="h-4 w-4 text-purple-500" />
-        <h3 className="text-sm font-semibold text-gray-700">选择发型</h3>
+        <h3 className="text-sm font-semibold text-gray-700">{t("hairStyle.title")}</h3>
         <div className="ml-auto flex items-center gap-2">
           {totalCount > 0 && (
             <span className="text-xs text-gray-400">
-              已选 {totalCount} 款
+              {t("hairStyle.selected", { count: totalCount })}
             </span>
           )}
           <button
@@ -135,7 +137,7 @@ export default function HairStyleSelector({
             }`}
           >
             <Dice5 className="h-3.5 w-3.5" />
-            随机生成 6 款
+            {t("hairStyle.random")}
           </button>
         </div>
       </div>
@@ -146,7 +148,7 @@ export default function HairStyleSelector({
           <section>
             <div className="mb-2 flex items-center gap-1.5">
               <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-              <span className="text-xs font-medium text-amber-600">AI 推荐发型</span>
+              <span className="text-xs font-medium text-amber-600">{t("hairStyle.aiRecommended")}</span>
             </div>
             <div className="flex flex-wrap gap-1.5">
               {recommendedStyles!.map((style, i) => (
@@ -173,9 +175,9 @@ export default function HairStyleSelector({
             <div className="mb-2 flex items-center gap-1.5">
               <Flame className="h-3.5 w-3.5 text-orange-500" />
               <span className="text-xs font-medium text-orange-600">
-                热门发型
+                {t("hairStyle.popular")}
                 {genderKnown && (
-                  <> · {isMale ? "男生" : "女生"}</>
+                  <> · {isMale ? t("hairStyle.male") : t("hairStyle.female")}</>
                 )}
               </span>
             </div>
@@ -207,7 +209,7 @@ export default function HairStyleSelector({
         <section>
           <div className="mb-2 flex items-center gap-1.5">
             <Palette className="h-3.5 w-3.5 text-blue-500" />
-            <span className="text-xs font-medium text-blue-600">定制发型</span>
+            <span className="text-xs font-medium text-blue-600">{t("hairStyle.custom")}</span>
           </div>
           <div className="space-y-3">
             {/* 长度 / 风格 / 类型 */}
@@ -216,7 +218,7 @@ export default function HairStyleSelector({
               const key = cat.name === "按长度" ? "length" : cat.name === "按风格" ? "style" : "type";
               return (
                 <div key={cat.name}>
-                  <p className="mb-1 text-[11px] text-gray-400">{cat.name}</p>
+                  <p className="mb-1 text-[11px] text-gray-400">{t(`hairStyle.category.${key}`)}</p>
                   <div className="flex flex-wrap items-center gap-1.5">
                     {cat.options.map((opt) => (
                       <button
@@ -234,7 +236,7 @@ export default function HairStyleSelector({
                     ))}
                     <input
                       type="text"
-                      placeholder="自行输入…"
+                      placeholder={t("hairStyle.customPlaceholder")}
                       value={slot.custom}
                       onChange={(e) => handleCustomInput(key, e.target.value)}
                       disabled={!!slot.preset || generating}
@@ -247,7 +249,7 @@ export default function HairStyleSelector({
 
             {/* 颜色 */}
             <div>
-              <p className="mb-1 text-[11px] text-gray-400">按颜色</p>
+              <p className="mb-1 text-[11px] text-gray-400">{t("hairStyle.category.color")}</p>
               <div className="flex flex-wrap items-center gap-1.5">
                 {HAIR_COLORS.map((c) => (
                   <div key={c.id} className="group relative">
@@ -270,7 +272,7 @@ export default function HairStyleSelector({
                 ))}
                 <input
                   type="text"
-                  placeholder="自行输入…"
+                  placeholder={t("hairStyle.customPlaceholder")}
                   value={customHair.color.custom}
                   onChange={(e) => handleCustomInput("color", e.target.value)}
                   disabled={!!customHair.color.preset || generating}
@@ -282,7 +284,7 @@ export default function HairStyleSelector({
             {/* 定制组合预览 */}
             {customParts.length > 0 && (
               <div className="rounded-md bg-blue-50/50 px-3 py-2">
-                <p className="text-[11px] text-blue-500">定制组合</p>
+                <p className="text-[11px] text-blue-500">{t("hairStyle.customCombination")}</p>
                 <p className="mt-0.5 text-xs font-medium text-blue-700">
                   {customParts.join(" + ")}
                 </p>
@@ -297,9 +299,7 @@ export default function HairStyleSelector({
         <div className="flex items-center justify-between">
           {totalCount > 0 && (
             <span className="text-xs text-gray-400">
-              已选{" "}
-              <span className="font-semibold text-gray-700">{totalCount}</span>{" "}
-              款发型
+              {t("hairStyle.selectedCount", { count: totalCount })}
             </span>
           )}
           <button
@@ -312,7 +312,7 @@ export default function HairStyleSelector({
             }`}
           >
             <Check className="h-3.5 w-3.5" />
-            生成选中发型
+            {t("hairStyle.generate")}
             {totalCount > 0 && ` (${totalCount})`}
           </button>
         </div>

@@ -5,6 +5,7 @@ import { Loader2, Download, ImageIcon, Share2 } from "lucide-react";
 import ResultCard from "@/components/result-card";
 import { generateShareCard } from "@/lib/share-card";
 import type { GenerationResult, FaceAnalysis } from "@/types";
+import { useTranslation } from "@/lib/i18n/hook";
 
 interface GeneratingState {
   active: boolean;
@@ -20,6 +21,7 @@ interface ResultGridProps {
 }
 
 export default function ResultGrid({ results, generating, originalImage, analysis }: ResultGridProps) {
+  const { t, lang } = useTranslation();
   const [generatingCard, setGeneratingCard] = useState(false);
   const handleBatchDownload = () => {
     results.forEach((result, i) => {
@@ -39,7 +41,7 @@ export default function ResultGrid({ results, generating, originalImage, analysi
     if (!originalImage || !analysis || results.length === 0) return;
     setGeneratingCard(true);
     try {
-      const blob = await generateShareCard({ originalImage, analysis, results });
+      const blob = await generateShareCard({ originalImage, analysis, results, lang });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.download = `cchair-share-${Date.now()}.png`;
@@ -62,7 +64,7 @@ export default function ResultGrid({ results, generating, originalImage, analysi
       {results.length > 0 && (
         <div className="mb-3 flex items-center justify-between">
           <p className="text-xs text-surface-400">
-            共 <span className="font-semibold text-surface-600">{results.length}</span> 张
+            {t("result.total", { count: results.length })}
           </p>
           <div className="flex items-center gap-2">
             <button
@@ -75,7 +77,7 @@ export default function ResultGrid({ results, generating, originalImage, analysi
               ) : (
                 <Share2 className="h-3.5 w-3.5" />
               )}
-              生成分享卡片
+              {t("result.shareCard")}
             </button>
             <button
               onClick={handleBatchDownload}
@@ -83,7 +85,7 @@ export default function ResultGrid({ results, generating, originalImage, analysi
               className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-surface-500 transition-colors hover:bg-surface-100 hover:text-surface-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Download className="h-3.5 w-3.5" />
-              全部下载
+              {t("result.downloadAll")}
             </button>
           </div>
         </div>
@@ -94,7 +96,7 @@ export default function ResultGrid({ results, generating, originalImage, analysi
         <div className="flex flex-col items-center gap-3 py-16">
           <ImageIcon className="h-10 w-10 text-surface-300" />
           <p className="text-sm text-surface-400">
-            上传人像照并选择发型后，效果将在这里展示
+            {t("result.empty")}
           </p>
         </div>
       ) : (
@@ -108,7 +110,7 @@ export default function ResultGrid({ results, generating, originalImage, analysi
               <div className="flex flex-col items-center gap-2">
                 <Loader2 className="h-6 w-6 animate-spin text-primary-500" />
                 <span className="text-xs text-surface-400">
-                  正在生成 {generating.current}/{generating.total}
+                  {t("result.generating", { current: generating.current, total: generating.total })}
                 </span>
               </div>
             </div>

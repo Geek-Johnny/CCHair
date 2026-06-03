@@ -1,4 +1,7 @@
 import type { FaceAnalysis, GenerationResult } from "@/types";
+import type { Lang } from "@/lib/i18n/config";
+import zh from "@/locales/zh.json";
+import en from "@/locales/en.json";
 
 const W = 1080;
 const H = 1920;
@@ -15,10 +18,13 @@ const TEXT_LIGHT = "#8888a0";
 const WHITE = "#ffffff";
 const DIVIDER = "#e8e8f0";
 
+const translations = { zh, en };
+
 interface ShareCardOptions {
   originalImage: string;
   analysis: FaceAnalysis;
   results: GenerationResult[];
+  lang?: Lang;
 }
 
 function loadImage(src: string): Promise<HTMLImageElement> {
@@ -116,7 +122,8 @@ function wrapText(
 export async function generateShareCard(
   options: ShareCardOptions
 ): Promise<Blob> {
-  const { originalImage, analysis, results } = options;
+  const { originalImage, analysis, results, lang = "zh" } = options;
+  const t = translations[lang].shareCard;
   const displayResults = results.slice(0, 6);
 
   const canvas = document.createElement("canvas");
@@ -147,7 +154,7 @@ export async function generateShareCard(
   ctx.fillText("✦  CCHair", PAD, headerH / 2);
   ctx.font = "28px -apple-system, 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif";
   ctx.fillStyle = "rgba(255,255,255,0.8)";
-  ctx.fillText("AI 发型设计参考", PAD + 240, headerH / 2);
+  ctx.fillText(t.subtitle, PAD + 240, headerH / 2);
 
   let y = headerH + 50;
 
@@ -192,10 +199,10 @@ export async function generateShareCard(
   const valueX = cardX + 130;
 
   const infoItems = [
-    { label: "脸型", value: analysis.faceShape },
-    { label: "肤色", value: analysis.skinTone },
-    { label: "性别", value: analysis.gender },
-    { label: "年龄段", value: analysis.ageRange },
+    { label: t.faceShape, value: analysis.faceShape },
+    { label: t.skinTone, value: analysis.skinTone },
+    { label: t.gender, value: analysis.gender },
+    { label: t.ageRange, value: analysis.ageRange },
   ];
 
   for (const item of infoItems) {
@@ -216,7 +223,7 @@ export async function generateShareCard(
     ty += 8;
     ctx.font = "22px -apple-system, 'Noto Sans SC', 'PingFang SC', sans-serif";
     ctx.fillStyle = TEXT_LIGHT;
-    ctx.fillText("推荐", labelX, ty);
+    ctx.fillText(t.recommended, labelX, ty);
 
     ctx.font = "bold 22px -apple-system, 'Noto Sans SC', 'PingFang SC', sans-serif";
     ctx.fillStyle = PRIMARY;
@@ -239,7 +246,7 @@ export async function generateShareCard(
   ctx.fillStyle = TEXT_DARK;
   ctx.font = "bold 34px -apple-system, 'Noto Sans SC', 'PingFang SC', sans-serif";
   ctx.textBaseline = "middle";
-  ctx.fillText("✦  AI 推荐发型效果", PAD, y);
+  ctx.fillText(`✦  ${t.sectionTitle}`, PAD, y);
   y += 60;
 
   // ── Results grid (3×2) ──
@@ -317,7 +324,7 @@ export async function generateShareCard(
   ctx.fillStyle = TEXT_LIGHT;
   ctx.textBaseline = "middle";
   ctx.textAlign = "center";
-  ctx.fillText("cchair.ai  ·  AI 发型设计参考", W / 2, footerY + 10);
+  ctx.fillText(t.footer, W / 2, footerY + 10);
   ctx.textAlign = "left";
 
   // Convert to blob

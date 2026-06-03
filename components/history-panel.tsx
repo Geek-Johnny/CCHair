@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { X, Trash2, Clock, ImageIcon } from "lucide-react";
 import type { HistoryRecord } from "@/types";
 import { getAllRecords, deleteRecord } from "@/lib/db";
+import { useTranslation } from "@/lib/i18n/hook";
 
 interface HistoryPanelProps {
   onClose: () => void;
@@ -14,6 +15,7 @@ export default function HistoryPanel({
   onClose,
   onLoadRecord,
 }: HistoryPanelProps) {
+  const { t } = useTranslation();
   const [records, setRecords] = useState<HistoryRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -56,7 +58,7 @@ export default function HistoryPanel({
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-primary-500" />
             <h2 className="text-sm font-semibold text-surface-700">
-              历史记录
+              {t("history.title")}
             </h2>
           </div>
           <button
@@ -75,7 +77,7 @@ export default function HistoryPanel({
           ) : records.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-16 text-surface-400">
               <Clock className="h-8 w-8" />
-              <p className="text-sm">暂无历史记录</p>
+              <p className="text-sm">{t("history.empty")}</p>
             </div>
           ) : (
             <div className="space-y-1 p-3">
@@ -104,8 +106,8 @@ export default function HistoryPanel({
                     </p>
                     <p className="mt-0.5 text-[11px] text-surface-400">
                       {record.results.length > 0
-                        ? `${record.results.length} 张生成结果`
-                        : "仅完成分析"}
+                        ? t("history.resultCount", { count: record.results.length })
+                        : t("history.analysisOnly")}
                     </p>
                     <p className="mt-0.5 text-[11px] text-surface-300">
                       {formatDate(record.createdAt)}
