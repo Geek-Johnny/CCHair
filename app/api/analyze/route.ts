@@ -21,7 +21,7 @@ const ARK_BASE_URL = process.env.ARK_BASE_URL || "https://ark.cn-beijing.volces.
 const DMXAPI_KEY = process.env.DMXAPI_KEY;
 const DMXAPI_BASE_URL = process.env.DMXAPI_BASE_URL || "https://www.dmxapi.cn/v1";
 
-const ANALYSIS_PROMPT = `请分析这张人像照片，严格按照以下 JSON 格式返回（不要包含其他文字）：
+const ANALYSIS_PROMPT_ZH = `请分析这张人像照片，严格按照以下 JSON 格式返回（不要包含其他文字）：
 
 {
   "faceShape": "脸型（圆脸/方脸/瓜子脸/长脸/心形脸/椭圆脸）",
@@ -42,10 +42,37 @@ const ANALYSIS_PROMPT = `请分析这张人像照片，严格按照以下 JSON �
   "recommendedStyles": ["推荐的发型1", "推荐的发型2", "推荐的发型3"]
 }`;
 
-async function analyzeWithVolcano(image: string) {
+const ANALYSIS_PROMPT_EN = `Analyze this portrait photo and return in the following JSON format (return only the JSON, no other text):
+
+{
+  "faceShape": "face shape (round/square/oval/oblong/heart/diamond)",
+  "skinTone": "skin tone (fair/warm fair/natural/wheat/tan)",
+  "gender": "gender (Male/Female)",
+  "ageRange": "age range (e.g. 18-25, 25-30, 30-40)",
+  "features": {
+    "eyes": "eye shape description",
+    "eyebrows": "eyebrow shape description",
+    "nose": "nose shape description",
+    "lips": "lip shape description"
+  },
+  "currentHair": {
+    "length": "current hair length description",
+    "color": "current hair color description",
+    "style": "current hairstyle description"
+  },
+  "recommendedStyles": ["recommended hairstyle 1", "recommended hairstyle 2", "recommended hairstyle 3"]
+}`;
+
+function getAnalysisPrompt(lang?: string): string {
+  return lang === "en" ? ANALYSIS_PROMPT_EN : ANALYSIS_PROMPT_ZH;
+}
+
+async function analyzeWithVolcano(image: string, lang?: string) {
   if (!ARK_API_KEY) {
     throw new Error("火山方舟 API 密钥未配置");
   }
+
+  const prompt = getAnalysisPrompt(lang);
 
   const response = await fetchWithRetry(`${ARK_BASE_URL}/responses`, {
     method: "POST",
@@ -60,7 +87,7 @@ async function analyzeWithVolcano(image: string) {
           role: "user",
           content: [
             { type: "input_image", image_url: `data:image/jpeg;base64,${image}` },
-            { type: "input_text", text: ANALYSIS_PROMPT },
+            { type: "input_text", text: prompt },
           ],
         },
       ],
@@ -82,10 +109,12 @@ async function analyzeWithVolcano(image: string) {
   return JSON.parse(content.replace(/```json|```/g, "").trim());
 }
 
-async function analyzeWithDmxapi(image: string) {
+async function analyzeWithDmxapi(image: string, lang?: string) {
   if (!DMXAPI_KEY) {
     throw new Error("DMXAPI 密钥未配置");
   }
+
+  const prompt = getAnalysisPrompt(lang);
 
   const response = await fetchWithRetry(`${DMXAPI_BASE_URL}/chat/completions`, {
     method: "POST",
@@ -100,7 +129,7 @@ async function analyzeWithDmxapi(image: string) {
           role: "user",
           content: [
             { type: "image_url", image_url: { url: `data:image/jpeg;base64,${image}` } },
-            { type: "text", text: ANALYSIS_PROMPT },
+            { type: "text", text: prompt },
           ],
         },
       ],
@@ -120,7 +149,7 @@ async function analyzeWithDmxapi(image: string) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { image, provider } = await request.json();
+    const { image, provider, lang } = await request.json();
 
     if (!image) {
       return NextResponse.json({ error: "请提供图片" }, { status: 400 });
@@ -129,9 +158,9 @@ export async function POST(request: NextRequest) {
     let analysis: any;
 
     if (provider === "dmxapi") {
-      analysis = await analyzeWithDmxapi(image);
+      analysis = await analyzeWithDmxapi(image, lang);
     } else {
-      analysis = await analyzeWithVolcano(image);
+      analysis = await analyzeWithVolcano(image, lang);
     }
 
     return NextResponse.json({ analysis, provider: provider || "volcano" });

@@ -27,7 +27,7 @@ interface MainPanelProps {
 }
 
 export default function MainPanel({ loadRecord, onRecordLoaded, onQuotaRefresh }: MainPanelProps) {
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const fingerprint = useFingerprint();
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<FaceAnalysis | null>(null);
@@ -70,7 +70,7 @@ export default function MainPanel({ loadRecord, onRecordLoaded, onQuotaRefresh }
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: base64, provider: ANALYZE_PROVIDER }),
+        body: JSON.stringify({ image: base64, provider: ANALYZE_PROVIDER, lang }),
       });
       const data = await res.json();
       if (res.ok) {
