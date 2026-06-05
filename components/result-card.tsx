@@ -69,10 +69,10 @@ export default function ResultCard({ result }: ResultCardProps) {
   return (
     <>
       <div
-        className="group relative overflow-hidden rounded-xl border border-surface-200 bg-white"
+        className="studio-panel group relative overflow-hidden"
         style={{ animation: "fadeInUp 0.3s ease-out" }}
       >
-        <div className="aspect-square overflow-hidden">
+        <div className="aspect-square overflow-hidden bg-surface-950">
           <img
             src={getImageSrc(result.imageData)}
             alt={result.hairstyleName}
@@ -80,41 +80,41 @@ export default function ResultCard({ result }: ResultCardProps) {
           />
         </div>
 
-        <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/0 opacity-0 transition-all group-hover:bg-black/30 group-hover:opacity-100">
+        <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/0 opacity-0 transition-all group-hover:bg-black/45 group-hover:opacity-100">
           <button
             onClick={() => setLightboxOpen(true)}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-surface-700 shadow-sm transition-transform hover:scale-110"
+            className="flex h-9 w-9 items-center justify-center border border-white/20 bg-surface-50/95 text-surface-950 shadow-sm transition-transform hover:scale-110"
           >
             <Expand className="h-4 w-4" />
           </button>
           <button
             onClick={handleDownload}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-surface-700 shadow-sm transition-transform hover:scale-110"
+            className="flex h-9 w-9 items-center justify-center border border-white/20 bg-surface-50/95 text-surface-950 shadow-sm transition-transform hover:scale-110"
           >
             <Download className="h-4 w-4" />
           </button>
           <button
             onClick={handleShare}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-surface-700 shadow-sm transition-transform hover:scale-110"
+            className="flex h-9 w-9 items-center justify-center border border-white/20 bg-surface-50/95 text-surface-950 shadow-sm transition-transform hover:scale-110"
           >
             <Share2 className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="p-2.5">
+        <div className="border-t border-white/10 p-3">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-surface-800">
+            <p className="text-sm font-medium text-surface-50">
               {result.hairstyleName}
             </p>
             {shared && (
-              <span className="text-[10px] text-primary-500">{t("result.copied")}</span>
+              <span className="text-[10px] text-primary-200">{t("result.copied")}</span>
             )}
           </div>
           <div className="mt-1 flex flex-wrap gap-1">
             {result.hairstyleTags.map((tag, i) => (
               <span
                 key={i}
-                className="rounded-full bg-surface-100 px-2 py-0.5 text-[10px] text-surface-500"
+                className="border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] text-surface-400"
               >
                 {tag}
               </span>
@@ -126,7 +126,7 @@ export default function ResultCard({ result }: ResultCardProps) {
       {/* Lightbox */}
       {lightboxOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-sm"
           role="dialog"
           aria-modal="true"
           onClick={() => setLightboxOpen(false)}
@@ -138,9 +138,9 @@ export default function ResultCard({ result }: ResultCardProps) {
             <img
               src={getImageSrc(result.imageData)}
               alt={result.hairstyleName}
-              className="max-h-[85vh] max-w-full rounded-lg object-contain"
+              className="max-h-[85vh] max-w-full border border-white/15 object-contain shadow-2xl"
             />
-            <p className="mt-2 text-center text-sm text-white">
+            <p className="mt-3 text-center text-sm text-surface-100">
               {result.hairstyleName}
             </p>
           </div>

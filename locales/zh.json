@@ -98,6 +98,9 @@
     "networkError": "网络错误，请重试"
   },
   "mainPanel": {
+    "kicker": "AI 造型影棚",
+    "heroTitle": "精准识别脸型，匹配理想发型",
+    "heroSubtitle": "上传人像照，获得更适合你的影棚级发型方案。",
     "analysisError": "分析失败，请重试",
     "networkError": "网络错误，请检查网络后重试",
     "quotaExceeded": "额度已用完，升级后可继续生成",

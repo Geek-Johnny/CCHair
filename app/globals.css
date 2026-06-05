@@ -1,35 +1,113 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary-50: #f0f0ff;
-  --color-primary-100: #e0e0ff;
-  --color-primary-200: #c4c0ff;
-  --color-primary-300: #9e94ff;
-  --color-primary-400: #7a60ff;
-  --color-primary-500: #5c3aff;
-  --color-primary-600: #4d1ef7;
-  --color-primary-700: #4112e3;
-  --color-primary-800: #3610bf;
-  --color-primary-900: #2e0f9c;
-  --color-primary-950: #1b076a;
+  --color-primary-50: #fff7e7;
+  --color-primary-100: #fce9bd;
+  --color-primary-200: #f5d384;
+  --color-primary-300: #e8b756;
+  --color-primary-400: #d49b38;
+  --color-primary-500: #b98128;
+  --color-primary-600: #94621f;
+  --color-primary-700: #74491d;
+  --color-primary-800: #5f3c1d;
+  --color-primary-900: #4f331c;
+  --color-primary-950: #2d1a0c;
 
-  --color-surface-50: #f8f9fa;
-  --color-surface-100: #f1f3f5;
-  --color-surface-200: #e9ecef;
-  --color-surface-300: #dee2e6;
-  --color-surface-400: #ced4da;
-  --color-surface-500: #adb5bd;
-  --color-surface-600: #868e96;
-  --color-surface-700: #495057;
-  --color-surface-800: #343a40;
-  --color-surface-900: #212529;
+  --color-surface-50: #f8f2e8;
+  --color-surface-100: #eadfce;
+  --color-surface-200: #d8c9b5;
+  --color-surface-300: #b9aa96;
+  --color-surface-400: #928675;
+  --color-surface-500: #70685c;
+  --color-surface-600: #554f46;
+  --color-surface-700: #393631;
+  --color-surface-800: #24231f;
+  --color-surface-900: #171613;
+  --color-surface-950: #0d0d0b;
+}
+
+html {
+  background: #0d0d0b;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
-    "Noto Sans SC", sans-serif;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 12% 4%, rgba(185, 129, 40, 0.18), transparent 28rem),
+    radial-gradient(circle at 82% 12%, rgba(74, 90, 80, 0.24), transparent 30rem),
+    linear-gradient(135deg, #11110f 0%, #191712 48%, #0d1110 100%);
+  color: #f8f2e8;
+  font-family: "Avenir Next", "Noto Sans SC", "PingFang SC", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: rgba(232, 183, 86, 0.32);
+  color: #fff7e7;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(185, 129, 40, 0.55) rgba(255, 255, 255, 0.05);
+}
+
+::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(185, 129, 40, 0.5);
+  border: 2px solid rgba(13, 13, 11, 0.9);
+  border-radius: 999px;
+}
+
+.studio-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+.studio-shell::before {
+  content: "";
+  position: fixed;
+  inset: 3.5rem 0 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent 86%);
+  opacity: 0.45;
+}
+
+.studio-panel {
+  border: 1px solid rgba(248, 242, 232, 0.12);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.025)),
+    rgba(20, 19, 16, 0.86);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(18px);
+}
+
+.studio-panel-soft {
+  border: 1px solid rgba(248, 242, 232, 0.1);
+  background: rgba(248, 242, 232, 0.055);
+}
+
+.studio-button-gold {
+  background: linear-gradient(135deg, #f5d384, #b98128);
+  color: #15110a;
+  box-shadow: 0 10px 26px rgba(185, 129, 40, 0.24);
+}
+
+.studio-button-gold:hover {
+  background: linear-gradient(135deg, #fff0bd, #d49b38);
 }
 
 @keyframes fadeInUp {

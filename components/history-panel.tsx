@@ -50,29 +50,29 @@ export default function HistoryPanel({
   return (
     <>
       <div
-        className="fixed inset-0 z-40 bg-black/30"
+        className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />
-      <div className="fixed inset-y-0 right-0 z-50 w-full bg-white shadow-xl md:w-[360px]">
-        <div className="flex h-14 items-center justify-between border-b border-surface-200 px-4">
+      <div className="fixed inset-y-0 right-0 z-50 w-full border-l border-white/10 bg-surface-950 shadow-2xl md:w-[380px]">
+        <div className="flex h-16 items-center justify-between border-b border-white/10 px-4">
           <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-primary-500" />
-            <h2 className="text-sm font-semibold text-surface-700">
+            <Clock className="h-4 w-4 text-primary-200" />
+            <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-200">
               {t("history.title")}
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="rounded-md p-1 text-surface-400 transition-colors hover:bg-surface-100 hover:text-surface-600"
+            className="p-1 text-surface-400 transition-colors hover:bg-white/10 hover:text-surface-100"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="h-[calc(100vh-3.5rem)] overflow-y-auto">
+        <div className="h-[calc(100vh-4rem)] overflow-y-auto">
           {loading ? (
             <div className="flex items-center justify-center py-16">
-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-surface-300 border-t-primary-500" />
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/15 border-t-primary-300" />
             </div>
           ) : records.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-16 text-surface-400">
@@ -85,9 +85,9 @@ export default function HistoryPanel({
                 <div
                   key={record.id}
                   onClick={() => onLoadRecord(record)}
-                  className="group flex cursor-pointer items-start gap-3 rounded-lg p-3 transition-colors hover:bg-surface-50"
+                  className="group flex cursor-pointer items-start gap-3 border border-transparent p-3 transition-colors hover:border-primary-300/20 hover:bg-white/[0.045]"
                 >
-                  <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-surface-100">
+                  <div className="h-12 w-12 shrink-0 overflow-hidden bg-white/10">
                     {record.originalImage ? (
                       <img
                         src={`data:image/jpeg;base64,${record.originalImage}`}
@@ -96,12 +96,12 @@ export default function HistoryPanel({
                       />
                     ) : (
                       <div className="flex h-full items-center justify-center">
-                        <ImageIcon className="h-5 w-5 text-surface-300" />
+                        <ImageIcon className="h-5 w-5 text-surface-500" />
                       </div>
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-medium text-surface-700">
+                    <p className="text-xs font-medium text-surface-100">
                       {record.analysis.faceShape} · {record.analysis.gender}
                     </p>
                     <p className="mt-0.5 text-[11px] text-surface-400">
@@ -115,7 +115,7 @@ export default function HistoryPanel({
                   </div>
                   <button
                     onClick={(e) => handleDelete(e, record.id)}
-                    className="shrink-0 rounded-md p-1 text-surface-300 opacity-0 transition-all hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
+                    className="shrink-0 p-1 text-surface-500 opacity-0 transition-all hover:bg-red-500/10 hover:text-red-300 group-hover:opacity-100"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>

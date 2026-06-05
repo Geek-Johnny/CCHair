@@ -116,24 +116,24 @@ export default function HairStyleSelector({
   if (disabled) return null;
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white">
+    <div className="studio-panel overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 pt-4">
-        <Sparkles className="h-4 w-4 text-purple-500" />
-        <h3 className="text-sm font-semibold text-gray-700">{t("hairStyle.title")}</h3>
+      <div className="flex items-center gap-2 border-b border-white/10 px-4 py-4">
+        <Sparkles className="h-4 w-4 text-primary-200" />
+        <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-primary-200">{t("hairStyle.title")}</h3>
         <div className="ml-auto flex items-center gap-2">
           {totalCount > 0 && (
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-surface-400">
               {t("hairStyle.selected", { count: totalCount })}
             </span>
           )}
           <button
             onClick={onRandomGenerate}
             disabled={generating}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+            className={`flex items-center gap-1.5 border px-3 py-1.5 text-xs font-semibold transition-all ${
               generating
-                ? "cursor-not-allowed bg-gray-100 text-gray-400"
-                : "bg-primary-500 text-white shadow-sm hover:bg-primary-600"
+                ? "cursor-not-allowed border-white/10 bg-white/5 text-surface-500"
+                : "border-primary-300/50 bg-primary-500/10 text-primary-100 hover:bg-primary-500/20"
             }`}
           >
             <Dice5 className="h-3.5 w-3.5" />
@@ -142,24 +142,24 @@ export default function HairStyleSelector({
         </div>
       </div>
 
-      <div className="space-y-4 px-4 pb-4 pt-3">
+      <div className="space-y-5 px-4 py-4">
         {/* ── AI 推荐 ── */}
         {showRec && (
           <section>
-            <div className="mb-2 flex items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-              <span className="text-xs font-medium text-amber-600">{t("hairStyle.aiRecommended")}</span>
+            <div className="mb-3 flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-primary-300" />
+              <span className="text-xs font-medium uppercase tracking-[0.16em] text-primary-300">{t("hairStyle.aiRecommended")}</span>
             </div>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-2">
               {recommendedStyles!.map((style, i) => (
                 <button
                   key={`rec-${i}`}
                   onClick={() => toggle(style)}
                   disabled={generating}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                  className={`border px-3 py-1.5 text-xs font-medium transition-all ${
                     isSelected(style)
-                      ? "bg-amber-500 text-white shadow-sm"
-                      : "bg-amber-50 text-amber-700 hover:bg-amber-100"
+                      ? "border-primary-300 bg-primary-300 text-surface-950 shadow-[0_0_18px_rgba(232,183,86,0.18)]"
+                      : "border-primary-300/35 bg-primary-500/10 text-primary-100 hover:bg-primary-500/20"
                   } ${generating ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
                 >
                   {style}
@@ -172,32 +172,32 @@ export default function HairStyleSelector({
         {/* ── 热门发型 ── */}
         {showPopular && (
           <section>
-            <div className="mb-2 flex items-center gap-1.5">
-              <Flame className="h-3.5 w-3.5 text-orange-500" />
-              <span className="text-xs font-medium text-orange-600">
+            <div className="mb-3 flex items-center gap-1.5">
+              <Flame className="h-3.5 w-3.5 text-primary-300" />
+              <span className="text-xs font-medium uppercase tracking-[0.16em] text-primary-300">
                 {t("hairStyle.popular")}
                 {genderKnown && (
                   <> · {isMale ? t("hairStyle.male") : t("hairStyle.female")}</>
                 )}
               </span>
             </div>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-2">
               {filteredPopular.map((h) => (
                 <div key={h.id} className="group relative">
                   <button
                     onClick={() => toggle(h.name)}
                     disabled={generating}
-                    className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                    className={`border px-3 py-1.5 text-xs font-medium transition-all ${
                       isSelected(h.name)
-                        ? "bg-gray-900 text-white shadow-sm"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        ? "border-surface-50 bg-surface-50 text-surface-950"
+                        : "border-white/10 bg-white/[0.045] text-surface-200 hover:border-white/25 hover:bg-white/[0.08]"
                     } ${generating ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
                   >
                     {h.name}
                   </button>
-                  <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 w-56 -translate-x-1/2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-600 opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+                  <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 w-56 -translate-x-1/2 border border-primary-300/25 bg-surface-950 px-3 py-2 text-xs text-surface-300 opacity-0 shadow-2xl transition-opacity group-hover:opacity-100">
                     <p className="leading-relaxed">{h.description}</p>
-                    <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-white" />
+                    <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-surface-950" />
                   </div>
                 </div>
               ))}
@@ -207,9 +207,9 @@ export default function HairStyleSelector({
 
         {/* ── 定制发型 ── */}
         <section>
-          <div className="mb-2 flex items-center gap-1.5">
-            <Palette className="h-3.5 w-3.5 text-blue-500" />
-            <span className="text-xs font-medium text-blue-600">{t("hairStyle.custom")}</span>
+          <div className="mb-3 flex items-center gap-1.5">
+            <Palette className="h-3.5 w-3.5 text-primary-300" />
+            <span className="text-xs font-medium uppercase tracking-[0.16em] text-primary-300">{t("hairStyle.custom")}</span>
           </div>
           <div className="space-y-3">
             {/* 长度 / 风格 / 类型 */}
@@ -218,17 +218,17 @@ export default function HairStyleSelector({
               const key = cat.name === "按长度" ? "length" : cat.name === "按风格" ? "style" : "type";
               return (
                 <div key={cat.name}>
-                  <p className="mb-1 text-[11px] text-gray-400">{t(`hairStyle.category.${key}`)}</p>
-                  <div className="flex flex-wrap items-center gap-1.5">
+                  <p className="mb-2 text-[11px] text-surface-400">{t(`hairStyle.category.${key}`)}</p>
+                  <div className="flex flex-wrap items-center gap-2">
                     {cat.options.map((opt) => (
                       <button
                         key={opt.id}
                         onClick={() => handlePreset(key, opt.name)}
                         disabled={generating}
-                        className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-all ${
+                        className={`border px-2.5 py-1 text-xs font-medium transition-all ${
                           slot.preset === opt.name
-                            ? "bg-blue-600 text-white shadow-sm"
-                            : "bg-blue-50 text-blue-700 hover:bg-blue-100"
+                            ? "border-primary-300 bg-primary-300 text-surface-950"
+                            : "border-white/10 bg-white/[0.035] text-surface-300 hover:border-primary-300/35 hover:text-primary-100"
                         } ${generating ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
                       >
                         {opt.name}
@@ -240,7 +240,7 @@ export default function HairStyleSelector({
                       value={slot.custom}
                       onChange={(e) => handleCustomInput(key, e.target.value)}
                       disabled={!!slot.preset || generating}
-                      className="ml-1 h-7 w-24 rounded-md border border-gray-200 px-2 text-xs text-gray-600 outline-none placeholder:text-gray-300 focus:border-blue-400 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-300"
+                      className="ml-1 h-7 w-24 border border-white/10 bg-surface-950/60 px-2 text-xs text-surface-100 outline-none placeholder:text-surface-500 focus:border-primary-300 disabled:cursor-not-allowed disabled:bg-white/[0.03] disabled:text-surface-600"
                     />
                   </div>
                 </div>
@@ -249,24 +249,24 @@ export default function HairStyleSelector({
 
             {/* 颜色 */}
             <div>
-              <p className="mb-1 text-[11px] text-gray-400">{t("hairStyle.category.color")}</p>
-              <div className="flex flex-wrap items-center gap-1.5">
+              <p className="mb-2 text-[11px] text-surface-400">{t("hairStyle.category.color")}</p>
+              <div className="flex flex-wrap items-center gap-2">
                 {HAIR_COLORS.map((c) => (
                   <div key={c.id} className="group relative">
                     <button
                       onClick={() => handlePreset("color", c.name)}
                       disabled={generating}
-                      className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-all ${
+                      className={`border px-2.5 py-1 text-xs font-medium transition-all ${
                         customHair.color.preset === c.name
-                          ? "bg-blue-600 text-white shadow-sm"
-                          : "bg-blue-50 text-blue-700 hover:bg-blue-100"
+                          ? "border-primary-300 bg-primary-300 text-surface-950"
+                          : "border-white/10 bg-white/[0.035] text-surface-300 hover:border-primary-300/35 hover:text-primary-100"
                       } ${generating ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
                     >
                       {c.name}
                     </button>
-                    <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 w-56 -translate-x-1/2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs text-gray-600 opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+                    <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 w-56 -translate-x-1/2 border border-primary-300/25 bg-surface-950 px-3 py-2 text-xs text-surface-300 opacity-0 shadow-2xl transition-opacity group-hover:opacity-100">
                       <p className="leading-relaxed">{c.description}</p>
-                      <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-white" />
+                      <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-surface-950" />
                     </div>
                   </div>
                 ))}
@@ -276,16 +276,16 @@ export default function HairStyleSelector({
                   value={customHair.color.custom}
                   onChange={(e) => handleCustomInput("color", e.target.value)}
                   disabled={!!customHair.color.preset || generating}
-                  className="ml-1 h-7 w-24 rounded-md border border-gray-200 px-2 text-xs text-gray-600 outline-none placeholder:text-gray-300 focus:border-blue-400 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-300"
+                  className="ml-1 h-7 w-24 border border-white/10 bg-surface-950/60 px-2 text-xs text-surface-100 outline-none placeholder:text-surface-500 focus:border-primary-300 disabled:cursor-not-allowed disabled:bg-white/[0.03] disabled:text-surface-600"
                 />
               </div>
             </div>
 
             {/* 定制组合预览 */}
             {customParts.length > 0 && (
-              <div className="rounded-md bg-blue-50/50 px-3 py-2">
-                <p className="text-[11px] text-blue-500">{t("hairStyle.customCombination")}</p>
-                <p className="mt-0.5 text-xs font-medium text-blue-700">
+              <div className="border border-primary-300/25 bg-primary-500/10 px-3 py-2">
+                <p className="text-[11px] text-primary-300">{t("hairStyle.customCombination")}</p>
+                <p className="mt-0.5 text-xs font-medium text-primary-100">
                   {customParts.join(" + ")}
                 </p>
               </div>
@@ -295,20 +295,20 @@ export default function HairStyleSelector({
       </div>
 
       {/* 底部确认按钮 */}
-      <div className="sticky bottom-0 border-t border-gray-100 bg-white/95 px-4 py-3 backdrop-blur-sm">
+      <div className="border-t border-white/10 bg-surface-950/85 px-4 py-3 backdrop-blur-xl">
         <div className="flex items-center justify-between">
           {totalCount > 0 && (
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-surface-400">
               {t("hairStyle.selectedCount", { count: totalCount })}
             </span>
           )}
           <button
             onClick={handleConfirm}
             disabled={totalCount === 0 || generating}
-            className={`ml-auto flex items-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+            className={`ml-auto flex items-center gap-1.5 px-4 py-2 text-sm font-semibold transition-all ${
               totalCount > 0 && !generating
-                ? "bg-gray-900 text-white shadow-sm hover:bg-gray-800"
-                : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                ? "studio-button-gold"
+                : "cursor-not-allowed border border-white/10 bg-white/5 text-surface-500"
             }`}
           >
             <Check className="h-3.5 w-3.5" />

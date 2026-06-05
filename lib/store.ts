@@ -1,10 +1,16 @@
 import { Redis } from "@upstash/redis";
 import { PLANS, FREE_CREDITS, type PlanKey } from "@/types/plan";
 
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL!,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-});
+const hasRedisConfig = Boolean(
+  process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+);
+
+const redis = hasRedisConfig
+  ? new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL!,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+    })
+  : null;
 
 interface UserData {
   sessionId: string;
@@ -36,8 +42,39 @@ function userOrdersKey(sessionId: string): string {
   return `orders:${sessionId}`;
 }
 
+const memoryStore = new Map<string, unknown>();
+const memorySets = new Map<string, Set<string>>();
+
+async function getValue<T>(key: string): Promise<T | null> {
+  if (redis) return redis.get<T>(key);
+  return (memoryStore.get(key) as T | undefined) ?? null;
+}
+
+async function setValue<T>(key: string, value: T): Promise<void> {
+  if (redis) {
+    await redis.set(key, value);
+    return;
+  }
+  memoryStore.set(key, value);
+}
+
+async function addSetValue(key: string, value: string): Promise<void> {
+  if (redis) {
+    await redis.sadd(key, value);
+    return;
+  }
+  const set = memorySets.get(key) ?? new Set<string>();
+  set.add(value);
+  memorySets.set(key, set);
+}
+
+async function getSetValues(key: string): Promise<string[]> {
+  if (redis) return redis.smembers(key);
+  return Array.from(memorySets.get(key) ?? []);
+}
+
 export async function getUser(sessionId: string): Promise<UserData> {
-  const existing = await redis.get<UserData>(userKey(sessionId));
+  const existing = await getValue<UserData>(userKey(sessionId));
   if (existing) return existing;
 
   const user: UserData = {
@@ -47,7 +84,7 @@ export async function getUser(sessionId: string): Promise<UserData> {
     createdAt: Date.now(),
   };
 
-  await redis.set(userKey(sessionId), user);
+  await setValue(userKey(sessionId), user);
   return user;
 }
 
@@ -75,7 +112,7 @@ export async function consumeQuota(sessionId: string): Promise<{ freeRemaining: 
     throw new Error("QUOTA_EXCEEDED");
   }
 
-  await redis.set(userKey(sessionId), user);
+  await setValue(userKey(sessionId), user);
   const newFreeRemaining = Math.max(0, FREE_CREDITS - user.freeUsed);
   return {
     freeRemaining: newFreeRemaining,
@@ -87,7 +124,7 @@ export async function consumeQuota(sessionId: string): Promise<{ freeRemaining: 
 export async function addCredits(sessionId: string, credits: number): Promise<void> {
   const user = await getUser(sessionId);
   user.paidCredits += credits;
-  await redis.set(userKey(sessionId), user);
+  await setValue(userKey(sessionId), user);
 }
 
 export async function createOrder(sessionId: string, plan: PlanKey): Promise<OrderData> {
@@ -102,14 +139,14 @@ export async function createOrder(sessionId: string, plan: PlanKey): Promise<Ord
     createdAt: Date.now(),
   };
 
-  await redis.set(orderKey(order.id), order);
+  await setValue(orderKey(order.id), order);
   // Add to user's order list
-  await redis.sadd(userOrdersKey(sessionId), order.id);
+  await addSetValue(userOrdersKey(sessionId), order.id);
   return order;
 }
 
 export async function updateOrder(orderId: string, status: "paid" | "failed"): Promise<OrderData | null> {
-  const order = await redis.get<OrderData>(orderKey(orderId));
+  const order = await getValue<OrderData>(orderKey(orderId));
   if (!order) return null;
 
   order.status = status;
@@ -117,21 +154,21 @@ export async function updateOrder(orderId: string, status: "paid" | "failed"): P
     order.paidAt = Date.now();
   }
 
-  await redis.set(orderKey(orderId), order);
+  await setValue(orderKey(orderId), order);
   return order;
 }
 
 export async function getOrder(orderId: string): Promise<OrderData | null> {
-  return redis.get<OrderData>(orderKey(orderId));
+  return getValue<OrderData>(orderKey(orderId));
 }
 
 export async function listOrders(sessionId: string): Promise<OrderData[]> {
-  const orderIds = await redis.smembers(userOrdersKey(sessionId));
+  const orderIds = await getSetValues(userOrdersKey(sessionId));
   if (!orderIds || orderIds.length === 0) return [];
 
   const orders: OrderData[] = [];
   for (const id of orderIds) {
-    const order = await redis.get<OrderData>(orderKey(id));
+    const order = await getValue<OrderData>(orderKey(id));
     if (order) orders.push(order);
   }
   return orders.sort((a, b) => b.createdAt - a.createdAt);

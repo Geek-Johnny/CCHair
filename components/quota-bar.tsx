@@ -53,27 +53,27 @@ export default function QuotaBar({ onUpgrade, refreshKey }: QuotaBarProps) {
   return (
     <div className="flex items-center gap-2">
       {quota.isAdmin ? (
-        <span className="text-xs text-green-600 font-medium">{t("quota.admin")}</span>
+        <span className="border border-emerald-300/30 bg-emerald-400/10 px-2.5 py-1.5 text-xs font-medium text-emerald-200">{t("quota.admin")}</span>
       ) : isFreeUser ? (
-        <span className="text-xs text-surface-500">
+        <span className="border border-white/10 bg-white/[0.03] px-2.5 py-1.5 text-xs text-surface-300">
           {isExhausted ? (
             t("quota.freeExhausted")
           ) : (
             <>
-              {t("quota.freeRemaining")} <span className="font-semibold text-surface-700">{quota.freeRemaining}</span> {t("quota.times")}
+              {t("quota.freeRemaining")} <span className="font-semibold text-primary-200">{quota.freeRemaining}</span> {t("quota.times")}
             </>
           )}
         </span>
       ) : (
-        <span className="text-xs text-surface-500">
-          {t("quota.paidRemaining")} <span className="font-semibold text-surface-700">{quota.totalRemaining}</span> {t("quota.times")}
+        <span className="border border-white/10 bg-white/[0.03] px-2.5 py-1.5 text-xs text-surface-300">
+          {t("quota.paidRemaining")} <span className="font-semibold text-primary-200">{quota.totalRemaining}</span> {t("quota.times")}
         </span>
       )}
 
       {!quota.isAdmin && isExhausted && (
         <button
           onClick={onUpgrade}
-          className="flex items-center gap-1 rounded-md bg-orange-500 px-2 py-1 text-xs font-medium text-white transition-colors hover:bg-orange-600"
+          className="flex items-center gap-1 bg-primary-500 px-2.5 py-1.5 text-xs font-semibold text-surface-950 transition-colors hover:bg-primary-300"
         >
           <Zap className="h-3 w-3" />
           {t("quota.upgrade")}

@@ -1,6 +1,6 @@
 # CCHair - AI 发型设计
 
-**v1.3** — FingerprintJS 指纹识别 + 管理员无限额度 + API 重试机制
+**v1.4** — 黑金影棚 UI 重构 + 本地额度 fallback + 生成链路兼容修复
 
 ## 项目概述
 上传人像照，AI 分析脸型五官，生成多款发型效果图。
@@ -13,6 +13,7 @@
 - **用户识别**: FingerprintJS 浏览器指纹（匿名，无注册）
 - **数据存储**: Upstash Redis（持久化额度/订单数据）
 - **部署**: Vercel（自动 SSL + 边缘网络）
+- **视觉风格**: 黑金影棚工作台（深色背景 + 暖金强调 + 作品墙结果）
 
 ## 目录结构
 ```
@@ -29,7 +30,7 @@
 ├── lib/
 │   ├── db.ts               # IndexedDB 操作（history CRUD）
 │   ├── use-fingerprint.ts  # FingerprintJS hook（浏览器指纹）
-│   ├── store.ts            # Upstash Redis 存储（用户/订单 CRUD）
+│   ├── store.ts            # Upstash Redis 存储（用户/订单 CRUD，本地无配置时内存 fallback）
 │   └── share-card.ts       # Canvas 分享卡片渲染
 ├── components/
 │   ├── header.tsx           # 顶部导航（含额度栏 + 套餐购买入口）
@@ -65,7 +66,7 @@ ARK_BASE_URL=https://ark.cn-beijing.volces.com/api/v3
 # 人脸分析 - DMXAPI (Mimo-V2.5)，可选
 DMXAPI_KEY=你的DMXAPI Key
 DMXAPI_BASE_URL=https://www.dmxapi.cn/v1
-# Upstash Redis（额度持久化）
+# Upstash Redis（额度持久化，生产推荐；本地未配置时自动使用内存 fallback）
 UPSTASH_REDIS_REST_URL=你的Upstash Redis URL
 UPSTASH_REDIS_REST_TOKEN=你的Upstash Redis Token
 # 管理员指纹（无限额度，可选）
@@ -90,6 +91,7 @@ npm run lint      # 代码检查
 
 ### POST /api/generate
 发型生成（含额度检查），调用 Seedream 5.0 Lite。含自动重试机制。管理员豁免额度检查。
+兼容 Seedream 返回 `b64_json` 或相对图片 URL（如 `/pipeline`）的情况。
 ```json
 // Request: { "image": "base64编码的图片", "hairstyle": "发型描述", "fingerprint": "浏览器指纹" }
 // Response: { "image": "base64编码的结果图", "remaining": 剩余次数 }
@@ -151,6 +153,14 @@ npm run lint      # 代码检查
   - 自动 SSL 证书
   - 边缘网络加速
   - GitHub 自动部署
+✅ 阶段 6.1.5：UI 与本地开发稳定性优化
+  - 全站视觉重构为黑金影棚工作台，弱化白紫 AI 模板感
+  - Header、上传区、分析卡、发型选择器、结果墙、历史抽屉、购买弹窗统一深色设计
+  - 首页 slogan 更新为「精准识别脸型，匹配理想发型」
+  - 分析结果卡片兼容缺失 `recommendedStyles/features/currentHair` 字段
+  - Seedream 生成结果兼容 `b64_json` 与相对 URL（修复 `/pipeline` 解析失败）
+  - Upstash Redis 未配置时自动使用内存 fallback，避免本地额度查询/生成失败
+  - 根布局添加 hydration warning 抑制，兼容浏览器插件注入 html 属性
 ⬜ 阶段 6.2：支付对接
   - [ ] 接入实际支付平台（草莓支付/PayJS 等）
   - [ ] 支付回调签名验证

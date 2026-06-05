@@ -112,26 +112,31 @@ export default function UploadArea({ onImageUpload, onError, currentImage, disab
         onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
         onDragLeave={() => setDragging(false)}
         onClick={() => !disabled && inputRef.current?.click()}
-        className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 transition-colors
-          ${dragging ? "border-primary-400 bg-primary-50" : "border-surface-300 bg-white hover:border-surface-400"}
+        className={`studio-panel group relative flex min-h-72 cursor-pointer flex-col items-center justify-center overflow-hidden p-4 transition-all
+          ${dragging ? "border-primary-300 bg-primary-500/10" : "hover:border-primary-300/45 hover:bg-white/[0.07]"}
           ${disabled ? "cursor-not-allowed opacity-60" : ""}`}
       >
+        <div className="pointer-events-none absolute inset-3 border border-white/10" />
+        <div className="pointer-events-none absolute left-6 top-6 h-8 w-8 border-l border-t border-primary-300/70" />
+        <div className="pointer-events-none absolute bottom-6 right-6 h-8 w-8 border-b border-r border-primary-300/70" />
         {currentImage ? (
-          <div className="relative w-full">
+          <div className="relative z-10 flex w-full flex-col items-center">
+            <div className="flex h-[min(48vh,420px)] max-h-[420px] min-h-[240px] w-full items-center justify-center overflow-hidden bg-black/20">
             <img
               src={`data:image/jpeg;base64,${currentImage}`}
               alt={t("upload.previewAlt")}
-              className="mx-auto max-h-64 rounded-lg object-contain"
+              className="h-full w-full object-contain shadow-2xl"
             />
-            <p className="mt-2 text-center text-xs text-surface-500">{t("upload.reupload")}</p>
+            </div>
+            <p className="mt-3 text-center text-xs uppercase tracking-[0.18em] text-primary-200">{t("upload.reupload")}</p>
           </div>
         ) : (
           <>
-            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary-50">
-              <Upload className="h-5 w-5 text-primary-500" />
+            <div className="mb-4 flex h-14 w-14 items-center justify-center border border-primary-300/60 bg-primary-500/10 text-primary-200 shadow-[0_0_30px_rgba(185,129,40,0.16)] transition-transform group-hover:scale-105">
+              <Upload className="h-5 w-5" />
             </div>
-            <p className="text-sm font-medium text-surface-700">{t("upload.dropzone")}</p>
-            <p className="mt-1 text-xs text-surface-400">{t("upload.formats")}</p>
+            <p className="text-sm font-semibold text-surface-50">{t("upload.dropzone")}</p>
+            <p className="mt-2 text-xs text-surface-400">{t("upload.formats")}</p>
           </>
         )}
       </div>

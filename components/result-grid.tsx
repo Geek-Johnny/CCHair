@@ -59,18 +59,18 @@ export default function ResultGrid({ results, generating, originalImage, analysi
   const canShare = results.length > 0 && originalImage && analysis;
 
   return (
-    <div>
+    <div className="min-h-0">
       {/* Toolbar */}
       {results.length > 0 && (
-        <div className="mb-3 flex items-center justify-between">
-          <p className="text-xs text-surface-400">
+        <div className="mb-3 flex items-center justify-between border-b border-white/10 pb-3">
+          <p className="text-xs uppercase tracking-[0.18em] text-surface-400">
             {t("result.total", { count: results.length })}
           </p>
           <div className="flex items-center gap-2">
             <button
               onClick={handleShareCard}
               disabled={generating.active || generatingCard || !canShare}
-              className="flex items-center gap-1.5 rounded-lg bg-primary-500 px-3 py-1.5 text-xs font-medium text-white shadow-sm transition-colors hover:bg-primary-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center gap-1.5 bg-primary-400 px-3 py-1.5 text-xs font-semibold text-surface-950 shadow-sm transition-colors hover:bg-primary-300 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {generatingCard ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -82,7 +82,7 @@ export default function ResultGrid({ results, generating, originalImage, analysi
             <button
               onClick={handleBatchDownload}
               disabled={generating.active}
-              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-surface-500 transition-colors hover:bg-surface-100 hover:text-surface-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center gap-1.5 border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-surface-300 transition-colors hover:border-primary-300/40 hover:bg-primary-500/10 hover:text-primary-100 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Download className="h-3.5 w-3.5" />
               {t("result.downloadAll")}
@@ -93,8 +93,8 @@ export default function ResultGrid({ results, generating, originalImage, analysi
 
       {/* Grid */}
       {showEmpty ? (
-        <div className="flex flex-col items-center gap-3 py-16">
-          <ImageIcon className="h-10 w-10 text-surface-300" />
+        <div className="studio-panel flex min-h-72 flex-col items-center justify-center gap-3 py-16">
+          <ImageIcon className="h-10 w-10 text-primary-300/60" />
           <p className="text-sm text-surface-400">
             {t("result.empty")}
           </p>
@@ -106,10 +106,10 @@ export default function ResultGrid({ results, generating, originalImage, analysi
           ))}
 
           {generating.active && (
-            <div className="flex animate-[fadeInUp_0.3s_ease-out] items-center justify-center rounded-xl border-2 border-dashed border-surface-300 bg-white p-12">
+            <div className="studio-panel-soft flex animate-[fadeInUp_0.3s_ease-out] items-center justify-center border-2 border-dashed border-primary-300/25 p-12">
               <div className="flex flex-col items-center gap-2">
-                <Loader2 className="h-6 w-6 animate-spin text-primary-500" />
-                <span className="text-xs text-surface-400">
+                <Loader2 className="h-6 w-6 animate-spin text-primary-300" />
+                <span className="text-xs text-surface-300">
                   {t("result.generating", { current: generating.current, total: generating.total })}
                 </span>
               </div>

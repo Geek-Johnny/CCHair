@@ -1,7 +1,7 @@
 # CCHair - AI 发型设计
 
 > 上传人像照，AI 分析脸型五官，一键生成多款发型效果图
-> **v1.3** — 已上线 https://www.aiheaven.top
+> **v1.4** — 黑金影棚 UI 重构，已上线 https://www.aiheaven.top
 
 ## 核心功能
 
@@ -17,6 +17,7 @@
 6. **分享卡片** — 将原图、脸型分析、生成结果合成为一张精美图片，方便社交分享
 7. **历史记录** — 分析结果和生成结果自动保存（IndexedDB），支持查看、恢复和删除
 8. **Freemium 额度** — 每个账户永久免费 3 次生成，付费套餐解锁更多
+9. **影棚级界面** — 黑金深色工作台，突出照片预览、发型选择和生成作品墙
 
 ## 商业模式
 
@@ -37,7 +38,7 @@
 | 人脸分析 | Mimo-V2.5 (DMXAPI) |
 | 图像生成 | Seedream 5.0 Lite (火山方舟) |
 | 用户识别 | FingerprintJS 浏览器指纹（匿名） |
-| 数据存储 | Upstash Redis（持久化额度/订单） |
+| 数据存储 | Upstash Redis（持久化额度/订单，本地无配置时内存 fallback） |
 | 部署 | Vercel（自动 SSL + 边缘网络） |
 
 ## 快速开始
@@ -55,7 +56,7 @@ ARK_API_KEY=你的火山方舟API Key
 # 人脸分析 (Mimo-V2.5)
 DMXAPI_KEY=你的DMXAPI Key
 DMXAPI_BASE_URL=https://www.dmxapi.cn/v1
-# Upstash Redis（额度持久化）
+# Upstash Redis（额度持久化，生产推荐；本地未配置时自动使用内存 fallback）
 UPSTASH_REDIS_REST_URL=你的Upstash Redis URL
 UPSTASH_REDIS_REST_TOKEN=你的Upstash Redis Token
 # 管理员指纹（无限额度，可选）
@@ -90,7 +91,7 @@ CCHair/
 │   ├── use-fingerprint.ts    # FingerprintJS hook（浏览器指纹）
 │   ├── store.ts              # Upstash Redis 存储（用户/订单 CRUD）
 │   └── share-card.ts         # Canvas 分享卡片渲染
-├── components/               # React 组件（12个）
+├── components/               # React 组件（黑金影棚 UI）
 ├── types/                    # TypeScript 类型 + 发型/颜色数据
 ├── public/                   # 静态资源
 ├── Pictures/                 # 示例图片
@@ -105,6 +106,16 @@ CCHair/
 | 人脸分析 | Mimo-V2.5 (DMXAPI) | ~0.004元 |
 | 发型生成 | Seedream 5.0 Lite | ~0.25元/张 |
 | 数据存储 | Upstash Redis | 免费额度 10K 命令/天 |
+
+## 最近更新
+
+### v1.4
+- 全站 UI 重构为黑金影棚工作台，移除白紫模板感
+- 首页 slogan 更新为「精准识别脸型，匹配理想发型」
+- 优化上传预览、发型选择滚动、结果展示、历史抽屉、购买弹窗等交互细节
+- 修复 Seedream 返回相对图片 URL（如 `/pipeline`）时的服务端解析问题
+- 本地未配置 Upstash Redis 时自动使用内存 fallback，避免额度查询和生成失败
+- 分析结果卡片增加字段缺失容错
 
 ## 在线访问
 

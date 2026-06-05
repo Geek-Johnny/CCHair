@@ -30,6 +30,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# local brainstorming mockups
+.superpowers/
+
 # generated test images
 Pictures/generated-*
 Pictures/*-short.png

@@ -21,9 +21,9 @@ const ICONS = {
 } as const;
 
 const STYLES = {
-  error: "border-red-200 bg-red-50 text-red-700",
-  success: "border-green-200 bg-green-50 text-green-700",
-  info: "border-blue-200 bg-blue-50 text-blue-700",
+  error: "border-red-400/30 bg-red-500/15 text-red-100",
+  success: "border-emerald-300/30 bg-emerald-500/15 text-emerald-100",
+  info: "border-primary-300/30 bg-primary-500/15 text-primary-100",
 } as const;
 
 function ToastItem({ toast, onRemove }: ToastItemProps) {
@@ -36,14 +36,14 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
 
   return (
     <div
-      className={`flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm shadow-md ${STYLES[toast.type]}`}
+      className={`flex items-center gap-2 border px-3 py-2.5 text-sm shadow-2xl backdrop-blur-xl ${STYLES[toast.type]}`}
       style={{ animation: "fadeInUp 0.2s ease-out" }}
     >
       <Icon className="h-4 w-4 shrink-0" />
       <span className="flex-1">{toast.message}</span>
       <button
         onClick={() => onRemove(toast.id)}
-        className="shrink-0 rounded p-0.5 opacity-60 hover:opacity-100"
+        className="shrink-0 p-0.5 opacity-60 hover:opacity-100"
       >
         <X className="h-3.5 w-3.5" />
       </button>

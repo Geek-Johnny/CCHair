@@ -17,6 +17,14 @@ const ARK_API_KEY = process.env.ARK_API_KEY;
 const ARK_BASE_URL = process.env.ARK_BASE_URL || "https://ark.cn-beijing.volces.com/api/v3";
 const ADMIN_FINGERPRINT = process.env.ADMIN_FINGERPRINT;
 
+function resolveImageUrl(imageUrl: string, requestUrl: string) {
+  try {
+    return new URL(imageUrl, requestUrl).toString();
+  } catch {
+    return imageUrl;
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { image, hairstyle, fingerprint } = await request.json();
@@ -75,16 +83,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const imageUrl = data.data?.[0]?.url;
+    const generated = data.data?.[0];
+    const imageUrl = generated?.url;
+    const imageBase64FromApi = generated?.b64_json;
 
-    if (!imageUrl) {
+    if (!imageUrl && !imageBase64FromApi) {
       return NextResponse.json({ error: "生成结果为空" }, { status: 500 });
     }
 
-    // 下载生成的图片并转为 base64（避免 URL 过期）
-    const imageResponse = await fetchWithRetry(imageUrl, {});
-    const imageBuffer = await imageResponse.arrayBuffer();
-    const imageBase64 = Buffer.from(imageBuffer).toString("base64");
+    let imageBase64 = imageBase64FromApi;
+    if (!imageBase64 && imageUrl) {
+      // 下载生成的图片并转为 base64（避免 URL 过期）。Seedream 偶尔返回 /pipeline
+      // 这类相对地址，Node fetch 需要先解析成绝对 URL。
+      const resolvedUrl = resolveImageUrl(imageUrl, response.url || url);
+      const imageResponse = await fetchWithRetry(resolvedUrl, {});
+      if (!imageResponse.ok) {
+        return NextResponse.json(
+          { error: `生成图片下载失败: ${imageResponse.statusText}` },
+          { status: imageResponse.status }
+        );
+      }
+      const imageBuffer = await imageResponse.arrayBuffer();
+      imageBase64 = Buffer.from(imageBuffer).toString("base64");
+    }
 
     // Consume quota after successful generation (admin skip)
     const remaining = isAdmin

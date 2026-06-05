@@ -200,10 +200,23 @@ export default function MainPanel({ loadRecord, onRecordLoaded, onQuotaRefresh }
     <>
       <ToastContainer toasts={toasts} onRemove={removeToast} />
       {/* 移动端：单列滚动 | 桌面端：左右分栏 */}
-      <div className="mx-auto max-w-7xl p-4 pb-20 md:h-[calc(100vh-3.5rem)] md:overflow-y-auto md:pb-4">
-        <div className="flex flex-col gap-4 md:h-full md:flex-row">
+      <div className="studio-shell mx-auto max-w-7xl p-4 pb-20 md:min-h-[calc(100vh-4rem)] md:pb-8">
+        <div className="mb-5 flex flex-col justify-between gap-3 border-b border-white/10 pb-5 md:flex-row md:items-end">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary-300">
+              {t("mainPanel.kicker")}
+            </p>
+            <h1 className="mt-2 text-2xl font-semibold tracking-wide text-surface-50 md:text-4xl">
+              {t("mainPanel.heroTitle")}
+            </h1>
+          </div>
+          <p className="max-w-xl text-sm leading-6 text-surface-300">
+            {t("mainPanel.heroSubtitle")}
+          </p>
+        </div>
+        <div className="flex flex-col gap-5 md:flex-row md:items-start">
           {/* 左侧面板 */}
-          <div className="flex w-full flex-col gap-4 md:max-h-none md:w-[400px] md:shrink-0 md:overflow-y-auto">
+          <div className="flex w-full flex-col gap-4 md:w-[410px] md:shrink-0">
             <UploadArea
               onImageUpload={handleImageUpload}
               onError={addError}
@@ -216,7 +229,7 @@ export default function MainPanel({ loadRecord, onRecordLoaded, onQuotaRefresh }
           </div>
 
           {/* 右侧面板 */}
-          <div className="flex flex-1 flex-col gap-4 md:overflow-y-auto">
+          <div className="flex min-w-0 flex-1 flex-col gap-5">
             {originalImage && (
               <HairStyleSelector
                 key={originalImage.slice(-20)}

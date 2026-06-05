@@ -98,6 +98,9 @@
     "networkError": "Network error, please retry"
   },
   "mainPanel": {
+    "kicker": "AI Styling Studio",
+    "heroTitle": "Analyze Your Face. Find Your Best Hair.",
+    "heroSubtitle": "Upload a portrait and get studio-ready hairstyle directions made for you.",
     "analysisError": "Analysis failed, please retry",
     "networkError": "Network error, please check your connection",
     "quotaExceeded": "Quota used up, upgrade to continue generating",
