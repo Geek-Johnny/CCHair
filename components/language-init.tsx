@@ -8,12 +8,12 @@ export default function LanguageInit() {
     const lang = detectLanguage();
     document.documentElement.lang = lang === "zh" ? "zh-CN" : "en";
     if (lang === "en") {
-      document.title = "CCHair - AI Hairstyle Design";
+      document.title = "HairMirra - AI Hairstyle Design";
       const metaDesc = document.querySelector('meta[name="description"]');
       if (metaDesc) {
         metaDesc.setAttribute(
           "content",
-          "Upload a portrait photo, AI analyzes your face shape, generate multiple hairstyle designs"
+          "Upload a photo and let the AI mirror reveal a look that suits you."
         );
       }
     }

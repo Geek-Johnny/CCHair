@@ -1,9 +1,20 @@
-# CCHair - AI 发型设计
+# HairMirra 发型魔镜 - AI 发型设计
 
-**v1.4** — 黑金影棚 UI 重构 + 本地额度 fallback + 生成链路兼容修复
+**v1.5** — 品牌升级 + 黑金镜面 Logo + 移动端 Header 与生成稳定性优化
 
 ## 项目概述
-上传人像照，AI 分析脸型五官，生成多款发型效果图。
+上传照片，让 AI 魔镜发现你的美。用户上传人像照后，AI 分析脸型五官并生成多款发型效果图。
+
+## 品牌设定
+- **中文名**: 发型魔镜
+- **英文名**: HairMirra
+- **Slogan**: 看见，另一个自己
+- **产品描述**: 上传照片，让 AI 魔镜发现你的美
+- **页面标题**: HairMirra 发型魔镜 - AI 发型设计
+- **品牌语气**: 温柔、高级、审美
+- **主视觉方向**: 高级感、黑金质感、影棚风格
+- **核心 CTA**: 开始试发型、上传照片、看看适合我的发型
+- **分享卡片文案**: 我在 HairMirra 看见了另一个自己
 
 ## 技术栈
 - **框架**: Next.js 15 (App Router) + TypeScript
@@ -14,6 +25,7 @@
 - **数据存储**: Upstash Redis（持久化额度/订单数据）
 - **部署**: Vercel（自动 SSL + 边缘网络）
 - **视觉风格**: 黑金影棚工作台（深色背景 + 暖金强调 + 作品墙结果）
+- **品牌资产**: HairMirra 高级衬线字标 + 镜面双 R favicon
 
 ## 目录结构
 ```
@@ -50,6 +62,9 @@
 │   └── plan.ts              # 套餐定义（GO/Plus/Pro）
 ├── data/                    # JSON 文件存储（gitignore）
 ├── public/                  # 静态资源
+│   ├── logo-hairmirra-gold.svg # 黑金字标 Logo
+│   ├── logo-hairmirra.svg      # 纯字标 Logo
+│   └── favicon.svg             # 镜面双 R favicon
 ├── Pictures/                # 示例图片
 ├── CLAUDE.md
 └── README.md
@@ -76,7 +91,7 @@ ADMIN_FINGERPRINT=管理员浏览器指纹ID
 ## 开发命令
 ```bash
 npm run dev       # 启动开发服务器（已内置 NODE_TLS_REJECT_UNAUTHORIZED=0）
-npm run build     # 生产构建
+NODE_TLS_REJECT_UNAUTHORIZED=0 npm run build  # 当前本地证书环境下的生产构建
 npm run lint      # 代码检查
 ```
 
@@ -161,6 +176,13 @@ npm run lint      # 代码检查
   - Seedream 生成结果兼容 `b64_json` 与相对 URL（修复 `/pipeline` 解析失败）
   - Upstash Redis 未配置时自动使用内存 fallback，避免本地额度查询/生成失败
   - 根布局添加 hydration warning 抑制，兼容浏览器插件注入 html 属性
+✅ 阶段 6.1.6：HairMirra 品牌升级
+  - 品牌从 CCHair 升级为 HairMirra 发型魔镜
+  - 页面 metadata、分享卡片、下载文件名、主要文案统一替换为 HairMirra
+  - 新增黑金镜面字标 Logo 与镜面双 R favicon
+  - 移动端 Header 调整为单行布局：Logo → 额度 → 语言图标 → 历史图标
+  - 生成结果写入 IndexedDB 历史记录失败时不再触发红屏
+  - 分享/复制兜底处理 Clipboard API 权限拒绝，失败时显示轻提示
 ⬜ 阶段 6.2：支付对接
   - [ ] 接入实际支付平台（草莓支付/PayJS 等）
   - [ ] 支付回调签名验证

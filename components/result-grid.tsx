@@ -28,7 +28,7 @@ export default function ResultGrid({ results, generating, originalImage, analysi
       setTimeout(() => {
         const link = document.createElement("a");
         const pad = String(i + 1).padStart(2, "0");
-        link.download = `cchair-${pad}-${result.hairstyleName}.png`;
+        link.download = `hairmirra-${pad}-${result.hairstyleName}.png`;
         link.href = result.imageData.startsWith("data:")
           ? result.imageData
           : `data:image/png;base64,${result.imageData}`;
@@ -44,7 +44,7 @@ export default function ResultGrid({ results, generating, originalImage, analysi
       const blob = await generateShareCard({ originalImage, analysis, results, lang });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
-      link.download = `cchair-share-${Date.now()}.png`;
+      link.download = `hairmirra-share-${Date.now()}.png`;
       link.href = url;
       link.click();
       URL.revokeObjectURL(url);

@@ -150,8 +150,8 @@ export async function generateShareCard(
   // Header text
   ctx.fillStyle = WHITE;
   ctx.textBaseline = "middle";
-  ctx.font = "bold 42px -apple-system, 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif";
-  ctx.fillText("✦  CCHair", PAD, headerH / 2);
+  ctx.font = "bold 42px Didot, 'Bodoni 72', Georgia, 'Times New Roman', serif";
+  ctx.fillText("HairMirra", PAD, headerH / 2);
   ctx.font = "28px -apple-system, 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif";
   ctx.fillStyle = "rgba(255,255,255,0.8)";
   ctx.fillText(t.subtitle, PAD + 240, headerH / 2);

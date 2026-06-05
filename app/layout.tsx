@@ -4,8 +4,11 @@ import { I18nProvider } from "@/lib/i18n/context";
 import LanguageInit from "@/components/language-init";
 
 export const metadata: Metadata = {
-  title: "CCHair - AI 发型设计",
-  description: "上传人像照，AI 分析脸型五官，一键生成多款发型效果图",
+  title: "HairMirra 发型魔镜 - AI 发型设计与试戴",
+  description: "上传照片，让 AI 魔镜看见更适合你的美。",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({

@@ -69,9 +69,10 @@
     "downloadAll": "全部下载",
     "empty": "上传人像照并选择发型后，效果将在这里展示",
     "generating": "正在生成 {current}/{total}",
-    "shareText": "看我用 CCHair 生成的「{name}」发型效果！",
-    "shareTitle": "CCHair 发型效果",
-    "copied": "已复制"
+    "shareText": "我在 HairMirra，看见了另一个自己：「{name}」发型效果",
+    "shareTitle": "HairMirra 发型效果",
+    "copied": "已复制",
+    "copyFailed": "复制失败"
   },
   "quota": {
     "admin": "管理员 · 无限额度",
@@ -106,20 +107,21 @@
     "quotaExceeded": "额度已用完，升级后可继续生成",
     "generateFailed": "「{name}」生成失败: {error}",
     "unknownError": "未知错误",
-    "generateFailedRetry": "「{name}」生成失败，请重试"
+    "generateFailedRetry": "「{name}」生成失败，请重试",
+    "historySaveFailed": "生成已完成，但历史记录保存失败"
   },
   "shareCard": {
-    "subtitle": "AI 发型设计参考",
+    "subtitle": "看见，另一个自己",
     "recommended": "推荐",
     "sectionTitle": "AI 推荐发型效果",
-    "footer": "cchair.ai  ·  AI 发型设计参考",
+    "footer": "HairMirra 发型魔镜  ·  AI 发型设计与试戴",
     "faceShape": "脸型",
     "skinTone": "肤色",
     "gender": "性别",
     "ageRange": "年龄段"
   },
   "metadata": {
-    "title": "CCHair - AI 发型设计",
-    "description": "上传人像照，AI 分析脸型五官，一键生成多款发型效果图"
+    "title": "HairMirra 发型魔镜 - AI 发型设计与试戴",
+    "description": "上传照片，让 AI 魔镜看见更适合你的美。"
   }
 }

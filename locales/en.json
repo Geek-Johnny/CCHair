@@ -69,9 +69,10 @@
     "downloadAll": "Download All",
     "empty": "Upload a portrait and choose a hairstyle to see results here",
     "generating": "Generating {current}/{total}",
-    "shareText": "Check out my \"{name}\" hairstyle generated with CCHair!",
-    "shareTitle": "CCHair Hairstyle Result",
-    "copied": "Copied"
+    "shareText": "I saw another side of myself on HairMirra: \"{name}\"",
+    "shareTitle": "HairMirra Hairstyle Result",
+    "copied": "Copied",
+    "copyFailed": "Copy failed"
   },
   "quota": {
     "admin": "Admin · Unlimited",
@@ -106,20 +107,21 @@
     "quotaExceeded": "Quota used up, upgrade to continue generating",
     "generateFailed": "\"{name}\" generation failed: {error}",
     "unknownError": "Unknown error",
-    "generateFailedRetry": "\"{name}\" generation failed, please retry"
+    "generateFailedRetry": "\"{name}\" generation failed, please retry",
+    "historySaveFailed": "Generation completed, but history could not be saved"
   },
   "shareCard": {
-    "subtitle": "AI Hairstyle Design",
+    "subtitle": "See another side of yourself",
     "recommended": "Recommended",
     "sectionTitle": "AI Recommended Hairstyles",
-    "footer": "cchair.ai  ·  AI Hairstyle Design",
+    "footer": "HairMirra  ·  AI Hairstyle Design & Try-On",
     "faceShape": "Face",
     "skinTone": "Skin",
     "gender": "Gender",
     "ageRange": "Age"
   },
   "metadata": {
-    "title": "CCHair - AI Hairstyle Design",
-    "description": "Upload a portrait photo, AI analyzes your face shape, generate multiple hairstyle designs"
+    "title": "HairMirra - AI Hairstyle Design & Try-On",
+    "description": "Upload a photo and let the AI mirror reveal a look that suits you."
   }
 }

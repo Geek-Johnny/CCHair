@@ -1,7 +1,7 @@
-# CCHair - AI 发型设计
+# HairMirra 发型魔镜 - AI 发型设计与试戴
 
-> 上传人像照，AI 分析脸型五官，一键生成多款发型效果图
-> **v1.4** — 黑金影棚 UI 重构，已上线 https://www.aiheaven.top
+> 上传照片，让 AI 魔镜看见更适合你的美。
+> **v1.5** — HairMirra 品牌升级 + 黑金镜面 Logo + 移动端 Header 与生成稳定性优化
 
 ## 核心功能
 
@@ -18,6 +18,7 @@
 7. **历史记录** — 分析结果和生成结果自动保存（IndexedDB），支持查看、恢复和删除
 8. **Freemium 额度** — 每个账户永久免费 3 次生成，付费套餐解锁更多
 9. **影棚级界面** — 黑金深色工作台，突出照片预览、发型选择和生成作品墙
+10. **品牌资产** — HairMirra 英文字标、镜面双 R favicon、分享卡片统一品牌露出
 
 ## 商业模式
 
@@ -94,6 +95,9 @@ CCHair/
 ├── components/               # React 组件（黑金影棚 UI）
 ├── types/                    # TypeScript 类型 + 发型/颜色数据
 ├── public/                   # 静态资源
+│   ├── logo-hairmirra-gold.svg # 黑金字标 Logo
+│   ├── logo-hairmirra.svg      # 纯字标 Logo
+│   └── favicon.svg             # 镜面双 R favicon
 ├── Pictures/                 # 示例图片
 ├── CLAUDE.md                 # AI 辅助文档
 └── README.md
@@ -108,6 +112,14 @@ CCHair/
 | 数据存储 | Upstash Redis | 免费额度 10K 命令/天 |
 
 ## 最近更新
+
+### v1.5
+- 品牌从 CCHair 升级为 HairMirra 发型魔镜，核心 slogan 为「看见，另一个自己」
+- 页面 title、metadata、分享卡片、下载文件名、前端文案统一替换为 HairMirra
+- 新增黑金镜面质感 Logo 与镜面双 R favicon，移动端 Header 使用高级字标
+- 移动端 Header 调整为单行：Logo → 额度 → 语言图标 → 历史图标
+- 生成完成后的历史记录写入增加异常保护，IndexedDB 保存失败不再导致红屏
+- 分享/复制兜底增加权限失败提示，浏览器拒绝 Clipboard API 时不再打断页面
 
 ### v1.4
 - 全站 UI 重构为黑金影棚工作台，移除白紫模板感

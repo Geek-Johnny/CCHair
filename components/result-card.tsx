@@ -17,6 +17,7 @@ export default function ResultCard({ result }: ResultCardProps) {
   const { t } = useTranslation();
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [shared, setShared] = useState(false);
+  const [shareFailed, setShareFailed] = useState(false);
 
   useEffect(() => {
     if (!lightboxOpen) return;
@@ -33,7 +34,7 @@ export default function ResultCard({ result }: ResultCardProps) {
 
   const handleDownload = useCallback(() => {
     const link = document.createElement("a");
-    link.download = `cchair-${result.hairstyleName}-${result.id.slice(0, 8)}.png`;
+    link.download = `hairmirra-${result.hairstyleName}-${result.id.slice(0, 8)}.png`;
     link.href = getImageSrc(result.imageData);
     link.click();
   }, [result]);
@@ -46,7 +47,7 @@ export default function ResultCard({ result }: ResultCardProps) {
       try {
         const res = await fetch(getImageSrc(result.imageData));
         const blob = await res.blob();
-        const file = new File([blob], `cchair-${result.hairstyleName}.png`, {
+        const file = new File([blob], `hairmirra-${result.hairstyleName}.png`, {
           type: "image/png",
         });
         await navigator.share({ title: t("result.shareTitle"), text, files: [file] });
@@ -60,9 +61,11 @@ export default function ResultCard({ result }: ResultCardProps) {
     try {
       await navigator.clipboard.writeText(text);
       setShared(true);
+      setShareFailed(false);
       setTimeout(() => setShared(false), 2000);
     } catch {
-      // clipboard not available either
+      setShareFailed(true);
+      setTimeout(() => setShareFailed(false), 2500);
     }
   }, [result, t]);
 
@@ -108,6 +111,9 @@ export default function ResultCard({ result }: ResultCardProps) {
             </p>
             {shared && (
               <span className="text-[10px] text-primary-200">{t("result.copied")}</span>
+            )}
+            {shareFailed && (
+              <span className="text-[10px] text-red-300">{t("result.copyFailed")}</span>
             )}
           </div>
           <div className="mt-1 flex flex-wrap gap-1">

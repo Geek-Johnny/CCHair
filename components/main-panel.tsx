@@ -148,7 +148,12 @@ export default function MainPanel({ loadRecord, onRecordLoaded, onQuotaRefresh }
     // Update IndexedDB record with full results
     const id = recordIdRef.current;
     if (id && snapshot.length > 0) {
-      await updateRecordResults(id, snapshot);
+      try {
+        await updateRecordResults(id, snapshot);
+      } catch (err) {
+        console.warn("历史记录保存失败:", err);
+        addError(t("mainPanel.historySaveFailed"));
+      }
     }
   };
 
