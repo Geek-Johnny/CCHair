@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Loader2, Download, ImageIcon, Share2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Loader2, Download, ImageIcon, Share2, X } from "lucide-react";
 import ResultCard from "@/components/result-card";
 import { generateShareCard } from "@/lib/share-card";
 import type { GenerationResult, FaceAnalysis } from "@/types";
@@ -23,6 +23,15 @@ interface ResultGridProps {
 export default function ResultGrid({ results, generating, originalImage, analysis }: ResultGridProps) {
   const { t, lang } = useTranslation();
   const [generatingCard, setGeneratingCard] = useState(false);
+  const [shareCardUrl, setShareCardUrl] = useState<string | null>(null);
+  const [shareCardError, setShareCardError] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (shareCardUrl) URL.revokeObjectURL(shareCardUrl);
+    };
+  }, [shareCardUrl]);
+
   const handleBatchDownload = () => {
     results.forEach((result, i) => {
       setTimeout(() => {
@@ -40,19 +49,36 @@ export default function ResultGrid({ results, generating, originalImage, analysi
   const handleShareCard = async () => {
     if (!originalImage || !analysis || results.length === 0) return;
     setGeneratingCard(true);
+    setShareCardError(null);
     try {
       const blob = await generateShareCard({ originalImage, analysis, results, lang });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.download = `hairmirra-share-${Date.now()}.png`;
-      link.href = url;
-      link.click();
-      URL.revokeObjectURL(url);
+      setShareCardUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return url;
+      });
     } catch (err) {
       console.error("生成分享卡片失败:", err);
+      setShareCardError(t("mainPanel.unknownError"));
     } finally {
       setGeneratingCard(false);
     }
+  };
+
+  const closeShareCardPreview = () => {
+    setShareCardUrl((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
+    setShareCardError(null);
+  };
+
+  const handleDownloadShareCard = () => {
+    if (!shareCardUrl) return;
+    const link = document.createElement("a");
+    link.download = `hairmirra-share-${Date.now()}.png`;
+    link.href = shareCardUrl;
+    link.click();
   };
 
   const showEmpty = results.length === 0 && !generating.active;
@@ -115,6 +141,69 @@ export default function ResultGrid({ results, generating, originalImage, analysi
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {shareCardUrl && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          onClick={closeShareCardPreview}
+        >
+          <div
+            className="flex w-full max-w-4xl flex-col overflow-hidden border border-white/10 bg-surface-950 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-200">
+                {t("result.previewTitle")}
+              </p>
+              <button
+                onClick={closeShareCardPreview}
+                className="p-1 text-surface-400 transition-colors hover:text-surface-100"
+                aria-label={t("common.cancel")}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="flex max-h-[75vh] flex-col gap-4 p-4 md:flex-row">
+              <button
+                type="button"
+                onClick={closeShareCardPreview}
+                className="group flex min-h-0 flex-1 items-center justify-center overflow-hidden border border-white/10 bg-black/20 p-0"
+                aria-label={t("common.cancel")}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={shareCardUrl}
+                  alt={t("result.previewTitle")}
+                  className="max-h-[70vh] w-full object-contain transition-opacity group-hover:opacity-95"
+                />
+              </button>
+              <div className="flex w-full flex-col gap-3 md:w-52 md:shrink-0">
+                <p className="text-sm leading-6 text-surface-300">
+                  {t("shareCard.subtitle")}
+                </p>
+                {shareCardError && (
+                  <p className="text-xs text-red-300">{shareCardError}</p>
+                )}
+                <button
+                  onClick={handleDownloadShareCard}
+                  className="flex items-center justify-center gap-1.5 bg-primary-400 px-4 py-2 text-sm font-semibold text-surface-950 transition-colors hover:bg-primary-300"
+                >
+                  <Download className="h-4 w-4" />
+                  {t("result.downloadCard")}
+                </button>
+                <button
+                  onClick={closeShareCardPreview}
+                  className="border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-surface-300 transition-colors hover:border-primary-300/40 hover:text-primary-100"
+                >
+                  {t("common.cancel")}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

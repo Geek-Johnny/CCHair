@@ -160,16 +160,11 @@ export default function MainPanel({ loadRecord, onRecordLoaded, onQuotaRefresh }
   const handleRandomGenerate = () => {
     if (!analysis) return;
 
-    // Build pool: AI recommended + gender-filtered popular styles
+    // Build pool from popular styles only, so AI recommendations stay a separate path
     const isMale = analysis.gender === "男" || analysis.gender === "男性";
     const genderKnown = analysis.gender !== undefined && analysis.gender !== null && analysis.gender !== "";
 
     const pool: string[] = [];
-
-    // Add AI recommended styles
-    if (analysis.recommendedStyles) {
-      pool.push(...analysis.recommendedStyles);
-    }
 
     // Add popular styles filtered by gender
     const popular = genderKnown
@@ -180,13 +175,13 @@ export default function MainPanel({ loadRecord, onRecordLoaded, onQuotaRefresh }
     // Deduplicate
     const unique = [...new Set(pool)];
 
-    // Shuffle and pick 6
+    // Shuffle and pick 3 to match the free quota and keep generation costs controlled.
     for (let i = unique.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [unique[i], unique[j]] = [unique[j], unique[i]];
     }
 
-    const selected = unique.slice(0, 6);
+    const selected = unique.slice(0, 3);
     const items: GenerateItem[] = selected.map((name) => ({
       hairstyle: name,
       name,

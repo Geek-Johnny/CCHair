@@ -52,6 +52,17 @@ export default function HairStyleSelector({
 
   const isMale = gender === "男" || gender === "男性";
   const genderKnown = gender !== undefined && gender !== null && gender !== "";
+  const allColors = useMemo(() => [...HAIR_COLORS.male, ...HAIR_COLORS.female], []);
+  const colorGroups = genderKnown
+    ? [{
+        key: isMale ? "male" : "female",
+        label: isMale ? t("hairStyle.male") : t("hairStyle.female"),
+        colors: HAIR_COLORS[isMale ? "male" : "female"],
+      }]
+    : [
+        { key: "male", label: t("hairStyle.male"), colors: HAIR_COLORS.male },
+        { key: "female", label: t("hairStyle.female"), colors: HAIR_COLORS.female },
+      ];
 
   const filteredPopular = useMemo(
     () =>
@@ -79,13 +90,27 @@ export default function HairStyleSelector({
     (c) => c.preset || c.custom
   );
 
+  const selectedColorPreset = allColors.find((c) => c.name === customHair.color.preset);
+
   const customParts = (() => {
-    const parts: string[] = [];
-    Object.values(customHair).forEach((c) => {
+    const display: string[] = [];
+    const prompt: string[] = [];
+
+    Object.entries(customHair).forEach(([key, c]) => {
+      if (!c.preset && !c.custom) return;
+
+      if (key === "color" && c.preset) {
+        display.push(selectedColorPreset?.name || c.preset);
+        prompt.push(`${selectedColorPreset?.name || c.preset} ${selectedColorPreset?.hex || ""}`.trim());
+        return;
+      }
+
       const v = c.preset || c.custom;
-      if (v) parts.push(v);
+      display.push(v);
+      prompt.push(v);
     });
-    return parts;
+
+    return { display, prompt };
   })();
 
   const handleConfirm = () => {
@@ -95,9 +120,10 @@ export default function HairStyleSelector({
       items.push({ hairstyle: name, name, tags: [name] });
     });
 
-    if (customParts.length > 0) {
-      const combined = customParts.join("+");
-      items.push({ hairstyle: combined, name: combined, tags: customParts });
+    if (customParts.display.length > 0) {
+      const displayName = customParts.display.join("+");
+      const promptName = customParts.prompt.join("+");
+      items.push({ hairstyle: promptName, name: displayName, tags: customParts.display });
     }
 
     if (items.length === 0) return;
@@ -195,9 +221,9 @@ export default function HairStyleSelector({
                   >
                     {h.name}
                   </button>
-                  <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 w-56 -translate-x-1/2 border border-primary-300/25 bg-surface-950 px-3 py-2 text-xs text-surface-300 opacity-0 shadow-2xl transition-opacity group-hover:opacity-100">
-                    <p className="leading-relaxed">{h.description}</p>
-                    <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-surface-950" />
+                  <div className="pointer-events-none absolute left-0 top-full z-10 mt-2 w-48 max-w-[calc(100vw-2rem)] border border-primary-300/25 bg-surface-950 px-3 py-2 text-xs text-surface-300 opacity-0 shadow-2xl transition-opacity group-hover:opacity-100">
+                    <p className="max-h-10 overflow-hidden leading-5">{h.description}</p>
+                    <div className="absolute left-4 bottom-full border-4 border-transparent border-b-surface-950" />
                   </div>
                 </div>
               ))}
@@ -249,24 +275,43 @@ export default function HairStyleSelector({
 
             {/* 颜色 */}
             <div>
-              <p className="mb-2 text-[11px] text-surface-400">{t("hairStyle.category.color")}</p>
-              <div className="flex flex-wrap items-center gap-2">
-                {HAIR_COLORS.map((c) => (
-                  <div key={c.id} className="group relative">
-                    <button
-                      onClick={() => handlePreset("color", c.name)}
-                      disabled={generating}
-                      className={`border px-2.5 py-1 text-xs font-medium transition-all ${
-                        customHair.color.preset === c.name
-                          ? "border-primary-300 bg-primary-300 text-surface-950"
-                          : "border-white/10 bg-white/[0.035] text-surface-300 hover:border-primary-300/35 hover:text-primary-100"
-                      } ${generating ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
-                    >
-                      {c.name}
-                    </button>
-                    <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 w-56 -translate-x-1/2 border border-primary-300/25 bg-surface-950 px-3 py-2 text-xs text-surface-300 opacity-0 shadow-2xl transition-opacity group-hover:opacity-100">
-                      <p className="leading-relaxed">{c.description}</p>
-                      <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-surface-950" />
+              <p className="mb-2 text-[11px] text-surface-400">
+                {t("hairStyle.category.color")}
+                {genderKnown && <> · {isMale ? t("hairStyle.male") : t("hairStyle.female")}</>}
+              </p>
+              <div className="space-y-4">
+                {colorGroups.map((group) => (
+                  <div key={group.key}>
+                    {!genderKnown && (
+                      <p className="mb-2 text-[11px] uppercase tracking-[0.16em] text-primary-300">{group.label}</p>
+                    )}
+                    <div className="flex flex-wrap gap-2">
+                      {group.colors.map((c) => (
+                        <div key={c.id} className="group relative">
+                          <button
+                            onClick={() => handlePreset("color", c.name)}
+                            disabled={generating}
+                            className={`inline-flex min-h-8 items-center gap-2 border px-2.5 py-1 text-xs font-medium transition-all ${
+                              customHair.color.preset === c.name
+                                ? "border-primary-300 bg-primary-300 text-surface-950"
+                                : "border-white/10 bg-white/[0.035] text-surface-300 hover:border-primary-300/35 hover:text-primary-100"
+                            } ${generating ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+                          >
+                            <span
+                              className={`h-2.5 w-2.5 shrink-0 rounded-full border ${
+                                customHair.color.preset === c.name ? "border-surface-950/20" : "border-white/15"
+                              }`}
+                              style={{ backgroundColor: c.hex }}
+                            />
+                            <span className="truncate">{c.name}</span>
+                          </button>
+                          <div className="pointer-events-none absolute left-0 top-full z-10 mt-2 w-48 max-w-[calc(100vw-2rem)] border border-primary-300/25 bg-surface-950 px-3 py-2 text-xs text-surface-300 opacity-0 shadow-2xl transition-opacity group-hover:opacity-100">
+                            <p className="max-h-10 overflow-hidden leading-5">{c.description}</p>
+                            <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-primary-300">{c.hex}</p>
+                            <div className="absolute left-4 bottom-full border-4 border-transparent border-b-surface-950" />
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ))}
@@ -276,17 +321,17 @@ export default function HairStyleSelector({
                   value={customHair.color.custom}
                   onChange={(e) => handleCustomInput("color", e.target.value)}
                   disabled={!!customHair.color.preset || generating}
-                  className="ml-1 h-7 w-24 border border-white/10 bg-surface-950/60 px-2 text-xs text-surface-100 outline-none placeholder:text-surface-500 focus:border-primary-300 disabled:cursor-not-allowed disabled:bg-white/[0.03] disabled:text-surface-600"
+                  className="h-9 w-full border border-white/10 bg-surface-950/60 px-3 text-xs text-surface-100 outline-none placeholder:text-surface-500 focus:border-primary-300 disabled:cursor-not-allowed disabled:bg-white/[0.03] disabled:text-surface-600"
                 />
               </div>
             </div>
 
             {/* 定制组合预览 */}
-            {customParts.length > 0 && (
+            {customParts.display.length > 0 && (
               <div className="border border-primary-300/25 bg-primary-500/10 px-3 py-2">
                 <p className="text-[11px] text-primary-300">{t("hairStyle.customCombination")}</p>
                 <p className="mt-0.5 text-xs font-medium text-primary-100">
-                  {customParts.join(" + ")}
+                  {customParts.display.join(" + ")}
                 </p>
               </div>
             )}

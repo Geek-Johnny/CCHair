@@ -40,7 +40,7 @@
   "hairStyle": {
     "title": "Choose Hairstyle",
     "selected": "{count} selected",
-    "random": "Random 6 Styles",
+    "random": "Random 3 Styles",
     "aiRecommended": "AI Recommended",
     "popular": "Popular Styles",
     "male": "Male",
@@ -65,7 +65,9 @@
   },
   "result": {
     "total": "{count} total",
-    "shareCard": "Share Card",
+    "shareCard": "Preview Card",
+    "previewTitle": "Share Card Preview",
+    "downloadCard": "Download Card",
     "downloadAll": "Download All",
     "empty": "Upload a portrait and choose a hairstyle to see results here",
     "generating": "Generating {current}/{total}",

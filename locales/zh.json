@@ -40,7 +40,7 @@
   "hairStyle": {
     "title": "选择发型",
     "selected": "已选 {count} 款",
-    "random": "随机生成 6 款",
+    "random": "随机生成 3 款",
     "aiRecommended": "AI 推荐发型",
     "popular": "热门发型",
     "male": "男生",
@@ -65,7 +65,9 @@
   },
   "result": {
     "total": "共 {count} 张",
-    "shareCard": "生成分享卡片",
+    "shareCard": "预览分享卡片",
+    "previewTitle": "分享卡片预览",
+    "downloadCard": "下载卡片",
     "downloadAll": "全部下载",
     "empty": "上传人像照并选择发型后，效果将在这里展示",
     "generating": "正在生成 {current}/{total}",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { X, Trash2, Clock, ImageIcon } from "lucide-react";
 import type { HistoryRecord } from "@/types";
 import { getAllRecords, deleteRecord } from "@/lib/db";
@@ -89,11 +90,16 @@ export default function HistoryPanel({
                 >
                   <div className="h-12 w-12 shrink-0 overflow-hidden bg-white/10">
                     {record.originalImage ? (
-                      <img
-                        src={`data:image/jpeg;base64,${record.originalImage}`}
-                        alt=""
-                        className="h-full w-full object-cover"
-                      />
+                      <div className="relative h-full w-full">
+                        <Image
+                          src={`data:image/jpeg;base64,${record.originalImage}`}
+                          alt=""
+                          fill
+                          sizes="48px"
+                          unoptimized
+                          className="object-cover"
+                        />
+                      </div>
                     ) : (
                       <div className="flex h-full items-center justify-center">
                         <ImageIcon className="h-5 w-5 text-surface-500" />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import Image from "next/image";
 import { Upload } from "lucide-react";
 import { useTranslation } from "@/lib/i18n/hook";
 
@@ -117,16 +118,17 @@ export default function UploadArea({ onImageUpload, onError, currentImage, disab
           ${disabled ? "cursor-not-allowed opacity-60" : ""}`}
       >
         <div className="pointer-events-none absolute inset-3 border border-white/10" />
-        <div className="pointer-events-none absolute left-6 top-6 h-8 w-8 border-l border-t border-primary-300/70" />
-        <div className="pointer-events-none absolute bottom-6 right-6 h-8 w-8 border-b border-r border-primary-300/70" />
         {currentImage ? (
           <div className="relative z-10 flex w-full flex-col items-center">
-            <div className="flex h-[min(48vh,420px)] max-h-[420px] min-h-[240px] w-full items-center justify-center overflow-hidden bg-black/20">
-            <img
-              src={`data:image/jpeg;base64,${currentImage}`}
-              alt={t("upload.previewAlt")}
-              className="h-full w-full object-contain shadow-2xl"
-            />
+            <div className="relative flex h-[min(48vh,420px)] max-h-[420px] min-h-[240px] w-full items-center justify-center overflow-hidden bg-black/20">
+              <Image
+                src={`data:image/jpeg;base64,${currentImage}`}
+                alt={t("upload.previewAlt")}
+                fill
+                sizes="(min-width: 768px) 410px, 100vw"
+                unoptimized
+                className="object-contain shadow-2xl"
+              />
             </div>
             <p className="mt-3 text-center text-xs uppercase tracking-[0.18em] text-primary-200">{t("upload.reupload")}</p>
           </div>

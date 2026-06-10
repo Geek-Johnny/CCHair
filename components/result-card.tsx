@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import Image from "next/image";
 import { Download, Expand, Share2 } from "lucide-react";
 import type { GenerationResult } from "@/types";
 import { useTranslation } from "@/lib/i18n/hook";
@@ -75,11 +76,14 @@ export default function ResultCard({ result }: ResultCardProps) {
         className="studio-panel group relative overflow-hidden"
         style={{ animation: "fadeInUp 0.3s ease-out" }}
       >
-        <div className="aspect-square overflow-hidden bg-surface-950">
-          <img
+        <div className="relative aspect-square overflow-hidden bg-surface-950">
+          <Image
             src={getImageSrc(result.imageData)}
             alt={result.hairstyleName}
-            className="h-full w-full object-cover transition-transform group-hover:scale-105"
+            fill
+            sizes="(min-width: 768px) 25vw, 100vw"
+            unoptimized
+            className="object-cover transition-transform group-hover:scale-105"
           />
         </div>
 
@@ -138,14 +142,24 @@ export default function ResultCard({ result }: ResultCardProps) {
           onClick={() => setLightboxOpen(false)}
         >
           <div
-            className="relative max-h-[90vh] max-w-[90vw]"
+            className="flex h-[90vh] w-[90vw] max-h-[90vh] max-w-[90vw] flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            <img
-              src={getImageSrc(result.imageData)}
-              alt={result.hairstyleName}
-              className="max-h-[85vh] max-w-full border border-white/15 object-contain shadow-2xl"
-            />
+            <button
+              type="button"
+              onClick={() => setLightboxOpen(false)}
+              className="group relative min-h-0 flex-1 overflow-hidden border border-white/15 bg-surface-950 shadow-2xl"
+              aria-label={t("common.cancel")}
+            >
+              <Image
+                src={getImageSrc(result.imageData)}
+                alt={result.hairstyleName}
+                fill
+                sizes="90vw"
+                unoptimized
+                className="object-contain transition-opacity group-hover:opacity-95"
+              />
+            </button>
             <p className="mt-3 text-center text-sm text-surface-100">
               {result.hairstyleName}
             </p>

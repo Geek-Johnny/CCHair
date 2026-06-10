@@ -5,18 +5,19 @@ import en from "@/locales/en.json";
 
 const W = 1080;
 const H = 1920;
-const PAD = 60;
-const RADIUS = 20;
+const PAD = 56;
+const RADIUS = 18;
 
 // Colors
-const PRIMARY = "#5c3aff";
-const PRIMARY_LIGHT = "#ede9fe";
-const SURFACE = "#f8f9fa";
-const TEXT_DARK = "#1a1a2e";
-const TEXT_MID = "#4a4a6a";
-const TEXT_LIGHT = "#8888a0";
+const GOLD_LIGHT = "#f1d48a";
+const GOLD_SOFT = "rgba(224,176,78,0.12)";
+const SURFACE = "#0f0e0b";
+const PANEL = "#171511";
+const TEXT_MAIN = "#f7f0e4";
+const TEXT_SECONDARY = "#c7bfae";
+const TEXT_MUTED = "#928870";
 const WHITE = "#ffffff";
-const DIVIDER = "#e8e8f0";
+const DIVIDER = "rgba(255,255,255,0.08)";
 
 const translations = { zh, en };
 
@@ -86,7 +87,7 @@ function drawCircleImage(
   ctx.save();
   ctx.beginPath();
   ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-  ctx.strokeStyle = WHITE;
+  ctx.strokeStyle = GOLD_LIGHT;
   ctx.lineWidth = 4;
   ctx.stroke();
   ctx.restore();
@@ -133,27 +134,39 @@ export async function generateShareCard(
 
   // ── Background ──
   const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
-  bgGrad.addColorStop(0, "#f5f3ff");
-  bgGrad.addColorStop(0.3, WHITE);
+  bgGrad.addColorStop(0, "#11100d");
+  bgGrad.addColorStop(0.45, "#0f0e0b");
   bgGrad.addColorStop(1, SURFACE);
   ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, W, H);
+
+  const glow = ctx.createRadialGradient(180, 160, 10, 180, 160, 420);
+  glow.addColorStop(0, "rgba(224,176,78,0.18)");
+  glow.addColorStop(1, "rgba(224,176,78,0)");
+  ctx.fillStyle = glow;
   ctx.fillRect(0, 0, W, H);
 
   // ── Header bar ──
   const headerH = 120;
   const headerGrad = ctx.createLinearGradient(0, 0, W, 0);
-  headerGrad.addColorStop(0, PRIMARY);
-  headerGrad.addColorStop(1, "#7c5cfc");
+  headerGrad.addColorStop(0, "#15130f");
+  headerGrad.addColorStop(1, "#0f0e0b");
   ctx.fillStyle = headerGrad;
   ctx.fillRect(0, 0, W, headerH);
+  ctx.strokeStyle = "rgba(224,176,78,0.28)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, headerH - 1);
+  ctx.lineTo(W, headerH - 1);
+  ctx.stroke();
 
   // Header text
-  ctx.fillStyle = WHITE;
+  ctx.fillStyle = GOLD_LIGHT;
   ctx.textBaseline = "middle";
   ctx.font = "bold 42px Didot, 'Bodoni 72', Georgia, 'Times New Roman', serif";
   ctx.fillText("HairMirra", PAD, headerH / 2);
   ctx.font = "28px -apple-system, 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif";
-  ctx.fillStyle = "rgba(255,255,255,0.8)";
+  ctx.fillStyle = "rgba(247,240,228,0.72)";
   ctx.fillText(t.subtitle, PAD + 240, headerH / 2);
 
   let y = headerH + 50;
@@ -185,12 +198,11 @@ export async function generateShareCard(
 
   ctx.save();
   drawRoundedRect(ctx, cardX, cardY, cardW, cardH, RADIUS);
-  ctx.fillStyle = WHITE;
+  ctx.fillStyle = "rgba(23,21,17,0.96)";
   ctx.fill();
-  ctx.shadowColor = "rgba(0,0,0,0.06)";
-  ctx.shadowBlur = 20;
-  ctx.shadowOffsetY = 4;
-  ctx.fill();
+  ctx.strokeStyle = "rgba(224,176,78,0.18)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
   ctx.restore();
 
   // Analysis content
@@ -207,12 +219,12 @@ export async function generateShareCard(
 
   for (const item of infoItems) {
     ctx.font = "24px -apple-system, 'Noto Sans SC', 'PingFang SC', sans-serif";
-    ctx.fillStyle = TEXT_LIGHT;
+    ctx.fillStyle = TEXT_MUTED;
     ctx.textBaseline = "middle";
     ctx.fillText(item.label, labelX, ty);
 
     ctx.font = "bold 26px -apple-system, 'Noto Sans SC', 'PingFang SC', sans-serif";
-    ctx.fillStyle = TEXT_DARK;
+    ctx.fillStyle = TEXT_MAIN;
     ctx.fillText(item.value, valueX, ty);
 
     ty += 44;
@@ -222,11 +234,11 @@ export async function generateShareCard(
   if (analysis.recommendedStyles && analysis.recommendedStyles.length > 0) {
     ty += 8;
     ctx.font = "22px -apple-system, 'Noto Sans SC', 'PingFang SC', sans-serif";
-    ctx.fillStyle = TEXT_LIGHT;
+    ctx.fillStyle = TEXT_MUTED;
     ctx.fillText(t.recommended, labelX, ty);
 
     ctx.font = "bold 22px -apple-system, 'Noto Sans SC', 'PingFang SC', sans-serif";
-    ctx.fillStyle = PRIMARY;
+    ctx.fillStyle = GOLD_LIGHT;
     const recText = analysis.recommendedStyles.slice(0, 3).join(" · ");
     ty = wrapText(ctx, recText, valueX, ty, cardW - 140, 32);
   }
@@ -243,7 +255,7 @@ export async function generateShareCard(
   y += 40;
 
   // ── Results section title ──
-  ctx.fillStyle = TEXT_DARK;
+  ctx.fillStyle = GOLD_LIGHT;
   ctx.font = "bold 34px -apple-system, 'Noto Sans SC', 'PingFang SC', sans-serif";
   ctx.textBaseline = "middle";
   ctx.fillText(`✦  ${t.sectionTitle}`, PAD, y);
@@ -264,12 +276,11 @@ export async function generateShareCard(
     // Card background
     ctx.save();
     drawRoundedRect(ctx, cx, cy, cellW, cellH, 16);
-    ctx.fillStyle = WHITE;
+    ctx.fillStyle = PANEL;
     ctx.fill();
-    ctx.shadowColor = "rgba(0,0,0,0.05)";
-    ctx.shadowBlur = 12;
-    ctx.shadowOffsetY = 2;
-    ctx.fill();
+    ctx.strokeStyle = "rgba(224,176,78,0.16)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
     ctx.restore();
 
     // Result image
@@ -294,13 +305,13 @@ export async function generateShareCard(
       ctx.restore();
     } catch {
       drawRoundedRect(ctx, cx + 10, cy + 10, cellW - 20, cellW - 20, 12);
-      ctx.fillStyle = "#f0f0f0";
+      ctx.fillStyle = "#1b1914";
       ctx.fill();
     }
 
     // Label
     ctx.font = "bold 22px -apple-system, 'Noto Sans SC', 'PingFang SC', sans-serif";
-    ctx.fillStyle = TEXT_DARK;
+    ctx.fillStyle = TEXT_MAIN;
     ctx.textBaseline = "top";
     const name = displayResults[i].hairstyleName;
     const nameMaxW = cellW - 16;
@@ -321,7 +332,7 @@ export async function generateShareCard(
   ctx.stroke();
 
   ctx.font = "24px -apple-system, 'Noto Sans SC', 'PingFang SC', sans-serif";
-  ctx.fillStyle = TEXT_LIGHT;
+  ctx.fillStyle = TEXT_SECONDARY;
   ctx.textBaseline = "middle";
   ctx.textAlign = "center";
   ctx.fillText(t.footer, W / 2, footerY + 10);

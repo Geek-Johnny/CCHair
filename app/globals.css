@@ -87,11 +87,16 @@ body {
 }
 
 .studio-panel {
+  position: relative;
+  overflow: hidden;
   border: 1px solid rgba(248, 242, 232, 0.12);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.025)),
-    rgba(20, 19, 16, 0.86);
-  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.24);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02)),
+    radial-gradient(circle at top left, rgba(185, 129, 40, 0.08), transparent 42%),
+    rgba(20, 19, 16, 0.9);
+  box-shadow:
+    0 26px 70px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(18px);
 }
 
@@ -101,13 +106,49 @@ body {
 }
 
 .studio-button-gold {
-  background: linear-gradient(135deg, #f5d384, #b98128);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(245, 211, 132, 0.42);
+  background:
+    linear-gradient(135deg, rgba(255, 242, 196, 0.96), rgba(232, 183, 86, 0.96) 45%, rgba(185, 129, 40, 0.98));
   color: #15110a;
-  box-shadow: 0 10px 26px rgba(185, 129, 40, 0.24);
+  box-shadow:
+    0 16px 34px rgba(185, 129, 40, 0.26),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    filter 180ms ease,
+    background 180ms ease;
 }
 
 .studio-button-gold:hover {
-  background: linear-gradient(135deg, #fff0bd, #d49b38);
+  transform: translateY(-1px);
+  box-shadow:
+    0 20px 42px rgba(185, 129, 40, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  filter: saturate(1.03) brightness(1.02);
+}
+
+.studio-button-gold:active {
+  transform: translateY(0) scale(0.995);
+  box-shadow:
+    0 12px 26px rgba(185, 129, 40, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.36);
+}
+
+.studio-button-gold::before {
+  content: "";
+  position: absolute;
+  inset: -30% -60%;
+  background: linear-gradient(120deg, transparent 35%, rgba(255, 255, 255, 0.45) 50%, transparent 65%);
+  transform: translateX(-60%) rotate(12deg);
+  transition: transform 450ms ease;
+  pointer-events: none;
+}
+
+.studio-button-gold:hover::before {
+  transform: translateX(70%) rotate(12deg);
 }
 
 @keyframes fadeInUp {
